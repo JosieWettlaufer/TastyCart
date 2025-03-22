@@ -205,8 +205,64 @@ const getCartById = async (req, res, next) => {
 }
 
 const postCheckout = async(req, res, next) => {
-    
-}
+    try {
+        // Get user ID from request
+        const userId = req.userId || (req.user && req.user.id);
+                
+        if (!userId) {
+            return res.status(401).json({ message: 'User ID not found' });
+        }
+
+        // Find the user
+        const user = await User.findById(userId);
+                
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Validate cart exists and is not empty
+        if (!user.userCart || !user.userCart.products || user.userCart.products.length === 0) {
+            return res.status(400).json({ message: 'Cart is empty or not found' });
+        }
+
+        // Get payment information from request body
+        const { paymentMethod, shippingAddress } = req.body;
+        
+        if (!paymentMethod || !shippingAddress) {
+            return res.status(400).json({ message: 'Payment information or shipping address missing' });
+        }
+        
+        // Here you would integrate with a payment processor like Stripe
+        // For now, we'll simulate a successful payment
+        
+        // Create order from cart
+        const order = {
+            user: userId,
+            orderItems: user.userCart.products,
+            shippingAddress,
+            paymentMethod,
+            totalPrice: user.userCart.priceTotal,
+            isPaid: true,
+            paidAt: Date.now()
+        };
+        
+        // Save order to database (assuming you have an Order model)
+        // const createdOrder = await Order.create(order);
+        
+        // Clear the user's cart after successful order
+        user.userCart.products = [];
+        user.userCart.priceTotal = 0;
+        await user.save();
+        
+        res.status(201).json({
+            message: 'Order created successfully',
+            order: order
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
 
 // Exporting the register and login functions so they can be used in other parts of the application
 module.exports = { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById,
