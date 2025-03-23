@@ -1,6 +1,6 @@
 const express = require('express');
 //IMPORT CONTROLLER METHODS
-const { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById, postCheckout } = require('../controllers/userController');
+const { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById, postCheckout, getOrders } = require('../controllers/userController');
 const protect = require('../middleware/protect');
 const router = express.Router();
 
@@ -33,6 +33,8 @@ router.get('/cart/:cartId', protect, getCartById);
 //Checkout
 router.post('/cart/:cartId/checkout', protect, postCheckout)
 
+
+router.get('/orders', protect, getOrders);
 /*
 
 //display confirmation page, pass username, possibly order summary

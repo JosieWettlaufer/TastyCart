@@ -264,7 +264,38 @@ const postCheckout = async(req, res, next) => {
     }
 };
 
+const getOrders = async(req, res, next) => {
+    try {
+        // Get user ID from request
+        const userId = req.userId || (req.user && req.user.id);
+                
+        if (!userId) {
+            return res.status(401).json({ message: 'User ID not found' });
+        }
+
+        // Find the user and include their orders
+        const user = await User.findById(userId);
+                
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if user has any orders
+        if (!user.userOrders || user.userOrders.length === 0) {
+            return res.status(404).json({ message: 'No orders found for this user' });
+        }
+        
+        res.status(200).json({
+            message: 'Orders retrieved successfully',
+            orders: user.userOrders
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 // Exporting the register and login functions so they can be used in other parts of the application
 module.exports = { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById,
-    postCheckout
+    postCheckout, getOrders
  };
