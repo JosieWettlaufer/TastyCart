@@ -246,6 +246,9 @@ const postCheckout = async(req, res, next) => {
             paidAt: Date.now()
         };
         
+        // Add the order to the user's userOrders array
+        user.userOrders.push(order);
+        
         // Save order to database (assuming you have an Order model)
         // const createdOrder = await Order.create(order);
         
