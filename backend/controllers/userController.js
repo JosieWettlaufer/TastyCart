@@ -64,20 +64,6 @@ const loginUser = async (req, res) => {
     });
 };
 
-const getUser = async(req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) return res.status(404).json({ message: "User not found" });
-    
-        res.json({
-          message: `Welcome, user ${req.user.id}`,
-          timers: user.timers, // Include the user's timers
-        });
-      } catch (error) {
-        res.status(500).json({ message: "Server error", error });
-      }
-}
-
 //Get Product by Id
 const getProductByID = async(req, res) => {
     const { productId } = req.params; //Get productId from URL 
@@ -299,6 +285,6 @@ const getOrders = async(req, res, next) => {
 };
 
 // Exporting the register and login functions so they can be used in other parts of the application
-module.exports = { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById,
+module.exports = { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
     postCheckout, getOrders
  };

@@ -12,7 +12,6 @@ const Dashboard = ({ user, setUser }) => {
         <div className="container">
             <div className="card mt-4 p-4">
                 <h2>Welcome, {user.username}!</h2>
-                <p>You have successfully logged in.</p>
                 
                 {/* User profile information */}
                 <div className="mt-3 mb-4">

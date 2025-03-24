@@ -8,9 +8,6 @@ const router = express.Router();
 router.post('/login', loginUser);
 router.post('/register', registerUser);
 
-//Protected routes (home page)
-router.get("/home", protect, getUser);
-
 //Get products by id
 router.get("/product/:productId", getProductByID);
 //Get products by catgory (eg. /product?category=cookie)
