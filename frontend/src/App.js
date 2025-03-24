@@ -7,6 +7,7 @@ import Login from "./components/Login";
 import Header from './components/Header';
 import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Cart from './components/Cart';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -36,8 +37,10 @@ const App = () => {
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
+            <Route path="/cart/:cartId" element={<Cart />} />
             <Route element={<ProtectedRoute user={user} />}>
               <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser}/>} />
+              
             </Route>
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
