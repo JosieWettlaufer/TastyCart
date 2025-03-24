@@ -5,15 +5,8 @@ const Dashboard = ({ user, setUser }) => {
     const navigate = useNavigate();
     
     if (!user) {
-        return <div>Loading user data...</div>;
+        return <div>Error loading user</div>;
     }
-    
-    const handleLogout = () => {
-        localStorage.removeItem("token"); 
-        localStorage.removeItem("user");
-        setUser(null);
-        navigate("/login");
-    };
     
     return (
         <div className="container">
@@ -25,16 +18,8 @@ const Dashboard = ({ user, setUser }) => {
                 <div className="mt-3 mb-4">
                     <h4>Your Profile</h4>
                     <p><strong>Username:</strong> {user.username}</p>
-                    <p><strong>Email:</strong> {user.email || "No email provided"}</p>
+                    <p><strong>Email:</strong> {user.email}</p>
                 </div>
-                
-                {/* Logout button */}
-                <button 
-                    className="btn btn-danger mt-3"
-                    onClick={handleLogout}
-                >
-                    Logout
-                </button>
             </div>
         </div>
     );

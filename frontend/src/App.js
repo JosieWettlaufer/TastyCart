@@ -29,7 +29,7 @@ const App = () => {
   return (
     <Router>
       <div className="container-fluid p-0">
-        <Header />
+        <Header setUser={ setUser }/>
         
         <div className="container mt-3">
           <Routes>
