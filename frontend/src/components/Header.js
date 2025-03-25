@@ -1,20 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';  // Import useLocation
+import '../static/Navbar.css';
 
 function Header( { setUser } ) {
   const location = useLocation();  // Get the current location (route)
   const navigate = useNavigate();
 
-  // Conditional header content based on the current route
-  const renderHeader = () => {
-    if (location.pathname === '/register') {
-      return <h1>Register for an Account</h1>;
-    } else if (location.pathname === '/login') {
-      return <h1>Welcome Back! Please Login</h1>;
-    } else {
-      return <h1>TastyCart</h1>;  // Default header
-    }
-  };
 
   //handles logout
   const handleLogout = () => {
@@ -37,24 +29,26 @@ function Header( { setUser } ) {
   }
 
   return (
-    <header className='bg-primary text-white p-3'>
-      <div className="container d-flex justify-content-between align-items-center">
-      {renderHeader()} {/* Render the header based on the current route */}
+    <header className='text-center'>
+      
 
-        <nav>
-          <ul className="nav">
-            <li className="nav-item">
-              <a className="nav-link text-white" href="./register">Register</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link text-white" href="./login">Login</a>
-            </li>
-            <li>
-              { showLogout() }
-            </li>
+        {/*Navigation links*/}
+        <nav className='navbar'>
+            {/*Logo*/}
+            <div className="logo">
+                <Link to="/">TastyCart</Link>
+            </div>
+
+
+          <ul className="navbar-links">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/dashboard">Products</Link></li>
+            <li><Link to="/login">Login</Link></li>
+            <li><Link to="/register">Register</Link></li>
+            <li><Link to="/cart">Cart</Link></li>
+            <li> { showLogout() }</li>
           </ul>
         </nav>
-      </div>
     </header>
   );
 }

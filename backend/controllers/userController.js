@@ -253,6 +253,36 @@ const postCheckout = async(req, res, next) => {
     }
 };
 
+//Delete cart items
+const deleteCartItem = async(req, res, next) => {
+    try {
+        // Get the authenticated user
+        const userId = req.user._id;
+        const itemId = req.params.itemId;
+
+        // Find the user and update their cart
+        const user = await User.findByIdAndUpdate(
+            userId, 
+            { $pull: { userCart: { _id: itemId } } }, // Remove item with matching ID
+            { new: true } // Return the updated document
+        );
+
+        // Check if user exists
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Respond with updated cart
+        res.status(200).json({
+            message: 'Item removed from cart successfully',
+            cart: user.userCart
+        });
+    } catch (err) {
+        console.error('Error removing cart item:', err);
+        next(err);
+    }
+}
+
 const getOrders = async(req, res, next) => {
     try {
         // Get user ID from request
@@ -286,5 +316,5 @@ const getOrders = async(req, res, next) => {
 
 // Exporting the register and login functions so they can be used in other parts of the application
 module.exports = { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
-    postCheckout, getOrders
+    postCheckout, deleteCartItem, getOrders
  };

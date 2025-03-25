@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from './ProductCard';
-import CartBtn from './CartBtn';
 
 const Dashboard = ({ user, setUser }) => {
+    // Component now works with or without a logged-in user
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,10 +15,12 @@ const Dashboard = ({ user, setUser }) => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
+                // Modified to handle both logged-in and non-logged-in states
+                const token = localStorage.getItem('token');
                 const response = await axios.get('http://localhost:5690/product', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
+                    headers: token ? {
+                        Authorization: `Bearer ${token}`
+                    } : {}
                 });
                 
                 // Handle the specific API response format
@@ -35,12 +37,13 @@ const Dashboard = ({ user, setUser }) => {
                 setError('Failed to load products. Please try again later.');
                 setLoading(false);
                 
-                // If server returns 401, token might be invalid
+                // If server returns 401 and user was logged in, clear credentials
+                // but don't redirect, just show products for non-logged in users
                 if (err.response && err.response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    setUser(null);
-                    navigate('/login');
+                    if (setUser) setUser(null);
+                    // Don't navigate away, let them stay on dashboard
                 }
             }
         };
@@ -48,24 +51,65 @@ const Dashboard = ({ user, setUser }) => {
         fetchProducts();
     }, [navigate, setUser]);
     
-    if (!user) {
-        return <div>Error loading user</div>;
-    }
+    // Removed the user check to allow non-logged in users to view the dashboard
     
     return (
         <div className="container">
-            {/* User profile card */}
-            <div className="card mt-4 p-4 mb-4 text-center">
-                <h2>Welcome, {user.username}! <CartBtn /></h2>
-            </div>
-            
-            {/* Products section */}
-            <div className="mt-4">
-                <h2 className="mb-4">Our Products</h2>
-                
+            {/* Hero Section */}
+            <section className="bg-light text-center py-5 mb-4">
+                <div className="py-5">
+                    <h2 className="display-4 fw-bold mb-4">
+                        Freshly Baked Happiness, Delivered to Your Door.
+                    </h2>
+                    <p className="lead mb-4">
+                        Discover homemade treats from passionate local bakers.
+                    </p>
+                    <div className="d-flex justify-content-center gap-3">
+                        <Link to="/login">
+                            <button className="btn btn-warning btn-lg">
+                                Shop Now
+                            </button>
+                        </Link>
+                        <Link to="/login">
+                                <button className="btn btn-outline-warning btn-lg me-2">
+                                    Become a Seller
+                                </button>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Search & Categories */}
+            <section className="mb-5 text-center">
+                <div className="d-flex justify-content-center align-items-center mb-4">
+                    <div className="input-group" style={{ maxWidth: '500px' }}>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Find delicious treats…"
+                        />
+                        <button className="btn btn-warning">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <div className="d-flex justify-content-center flex-wrap gap-2">
+                    {["Cakes", "Cookies", "Bread", "Pastries"].map((category) => (
+                        <button
+                            key={category}
+                            className="btn btn-outline-warning me-2 mb-2"
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            {/* Featured Products */}
+            <section className="mb-5">
                 {loading ? (
-                    <div className="text-center">
-                        <div className="spinner-border" role="status">
+                    <div className="text-center p-5">
+                        <div className="spinner-border text-warning" role="status">
                             <span className="visually-hidden">Loading...</span>
                         </div>
                     </div>
@@ -98,9 +142,40 @@ const Dashboard = ({ user, setUser }) => {
                         )}
                     </div>
                 )}
-            </div>
+            </section>
+
+            {/* How It Works */}
+            <section className="bg-light py-5 text-center mb-4">
+                <h3 className="display-6 fw-bold mb-4">How It Works</h3>
+                <div className="row g-4 justify-content-center">
+                    <div className="col-md-4">
+                        <div className="card h-100 border-0 bg-transparent">
+                            <div className="card-body">
+                                <h4 className="card-title fw-bold mb-3">1. Browse Products</h4>
+                                <p className="card-text">Explore categories and discover unique homemade goods.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="card h-100 border-0 bg-transparent">
+                            <div className="card-body">
+                                <h4 className="card-title fw-bold mb-3">2. Place Your Order</h4>
+                                <p className="card-text">Add your favorites to the cart and checkout easily.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="card h-100 border-0 bg-transparent">
+                            <div className="card-body">
+                                <h4 className="card-title fw-bold mb-3">3. Get It Delivered</h4>
+                                <p className="card-text">Enjoy fresh baked goods delivered straight to your door.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-    );
+    ); 
 };
 
 export default Dashboard;
