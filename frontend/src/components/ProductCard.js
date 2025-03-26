@@ -87,7 +87,6 @@ const ProductCard = ({ product }) => {
                 <h5 className="card-title">{product.name}</h5>
                 <p className="card-text text-truncate">{product.description}</p>
                 <p className="card-text fw-bold">${product.price.toFixed(2)}</p>
-                <p className='card-text'>Quantity: {product.quantity}</p>
                 <p className='card-text'>Category: {product.category}</p>
             </div>
             <div className="card-footer">

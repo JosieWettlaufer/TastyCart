@@ -7,6 +7,9 @@ const Dashboard = ({ user, setUser }) => {
     // Component now works with or without a logged-in user
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const [displayedItems, setDisplayedItems] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
+    const [searchQuery, setSearchQuery] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -26,6 +29,7 @@ const Dashboard = ({ user, setUser }) => {
                 // Handle the specific API response format
                 if (response.data && Array.isArray(response.data.products)) {
                     setProducts(response.data.products);
+                    setDisplayedItems(response.data.products);
                 } else {
                     console.error('Unexpected data format from API:', response.data);
                     setError('Received invalid data format from server');
@@ -52,6 +56,18 @@ const Dashboard = ({ user, setUser }) => {
     }, [navigate, setUser]);
     
     // Removed the user check to allow non-logged in users to view the dashboard
+
+    const sortByCategory = (selectedCategory) => {
+        setSelectedCategory(selectedCategory);
+        const filteredItems = products.filter(item => item.category === selectedCategory);
+        setDisplayedItems(filteredItems);
+    };
+
+    const sortByName = () => {
+        const filteredItems = products.filter(item => item.productName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setDisplayedItems(filteredItems);
+    };
     
     return (
         <div className="container">
@@ -86,18 +102,22 @@ const Dashboard = ({ user, setUser }) => {
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="Find delicious treats…"
+                            placeholder="Find delicious treats…" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                        <button className="btn btn-warning">
+                        <button className="btn btn-warning" onClick={sortByName}>
                             Search
                         </button>
                     </div>
                 </div>
                 <div className="d-flex justify-content-center flex-wrap gap-2">
-                    {["Cakes", "Cookies", "Bread", "Pastries"].map((category) => (
+                    {["Cakes", "Cookies", "Bread", "Pastries", "Muffins", "Other"].map((category) => (
                         <button
                             key={category}
-                            className="btn btn-outline-warning me-2 mb-2"
+                            className={`btn me-2 mb-2 ${
+                                selectedCategory === category ? "btn-warning" : "btn-outline-warning"}`}
+                            onClick={() => sortByCategory(category)}
                         >
                             {category}
                         </button>
@@ -120,7 +140,7 @@ const Dashboard = ({ user, setUser }) => {
                 ) : (
                     <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                         {products.length > 0 ? (
-                            products.map(product => (
+                            displayedItems.map(product => (
                                 <div className="col" key={product._id}>
                                     <ProductCard product={{
                                         id: product._id,
