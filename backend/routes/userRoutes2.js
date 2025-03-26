@@ -1,7 +1,7 @@
 const express = require('express');
 //IMPORT CONTROLLER METHODS
 const { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById, postCheckout,
-    deleteCartItem, updateCartItem, getOrders } = require('../controllers/userController');
+    deleteCartItem, updateCartItem, createOrder } = require('../controllers/userController');
 const protect = require('../middleware/protect');
 const router = express.Router();
 
@@ -24,10 +24,8 @@ router.delete('/cart/:itemId', protect, deleteCartItem)
 router.patch('/cart/items/:itemId', protect, updateCartItem);
 
 //Checkout
-router.post('/cart/:cartId/checkout', protect, postCheckout)
+router.post('/orders', protect, createOrder);
 
-
-router.get('/orders', protect, getOrders);
 /*
 
 //display confirmation page, pass username, possibly order summary

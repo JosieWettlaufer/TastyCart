@@ -10,6 +10,7 @@ import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Cart from './components/Cart';
 import NotFound from './components/NotFound'; // Recommended: Add a 404 page
+import Checkout from './components/Checkout';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -54,6 +55,7 @@ const App = () => {
             <Route element={<ProtectedRoute user={user} />}>
               <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
               <Route path="/cart" element={<Cart user={user} />} />
+              <Route path="/cart/checkout" element={<Checkout />}></Route>
             </Route>
             
             {/* 404 Route */}

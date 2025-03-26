@@ -189,9 +189,11 @@ function Cart() {
               <p className="card-text">
                 Total Price: ${calculateTotal()}
               </p>
-              <button className="btn btn-success w-100">
-                Proceed to Checkout
-              </button>
+              <Link to="/cart/checkout">
+                <button className="btn btn-success w-100">
+                  Proceed to Checkout
+                </button>
+              </Link>
             </div>
           </div>
         </div>
