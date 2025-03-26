@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -10,7 +10,12 @@ import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Cart from './components/Cart';
 import NotFound from './components/NotFound'; // Recommended: Add a 404 page
-import Checkout from './components/Checkout';
+import CheckoutFormAI from './components/CheckoutFormAI';
+import CheckoutForm from './components/CheckoutForm';
+import Return from './components/Return'
+
+
+
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -39,7 +44,7 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
+    <Router>
       <div className="container-fluid p-0">
         <Header setUser={setUser} user={user} /> {/* Pass user to Header for conditional rendering */}
         
@@ -50,12 +55,16 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/dashboard" element={<Dashboard />} />
+
+           
             
             {/* Protected Routes */}
             <Route element={<ProtectedRoute user={user} />}>
               <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
               <Route path="/cart" element={<Cart user={user} />} />
-              <Route path="/cart/checkout" element={<Checkout />}></Route>
+               {/* Stripe Routes */}
+              <Route path="/return" element={<Return />} /> 
+              <Route path="/cart/checkout" element={<CheckoutFormAI />}></Route>
             </Route>
             
             {/* 404 Route */}
@@ -63,7 +72,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 

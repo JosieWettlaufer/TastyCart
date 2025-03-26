@@ -26,9 +26,4 @@ router.patch('/cart/items/:itemId', protect, updateCartItem);
 //Checkout
 router.post('/orders', protect, createOrder);
 
-/*
-
-//display confirmation page, pass username, possibly order summary
-router.get("confirmation{userID}")
-*/
 module.exports = router;
