@@ -10,6 +10,12 @@ const productSchema = new mongoose.Schema({
   category: { type: String, default: 'cookie' }
 });
 
+//test cart
+const cartSchema = new mongoose.Schema({
+  priceTotal: { type: Number, required: true, default: 0}, 
+  products: [productSchema] // array of product objects
+});
+
 //Order model
 const orderSchema = new mongoose.Schema ({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -21,11 +27,7 @@ const orderSchema = new mongoose.Schema ({
   paidAt: {type: Date}
 });
 
-//test cart
-const cartSchema = new mongoose.Schema({
-  priceTotal: { type: Number, required: true, default: 0}, 
-  products: [productSchema] // array of product objects
-});
+
 
 
 const userSchema = new mongoose.Schema({
