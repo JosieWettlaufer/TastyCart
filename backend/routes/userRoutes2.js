@@ -1,7 +1,7 @@
 const express = require('express');
 //IMPORT CONTROLLER METHODS
 const { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById, postCheckout,
-    deleteCartItem, getOrders } = require('../controllers/userController');
+    deleteCartItem, updateCartItem, getOrders } = require('../controllers/userController');
 const protect = require('../middleware/protect');
 const router = express.Router();
 
@@ -14,21 +14,14 @@ router.get("/product/:productId", getProductByID);
 //Get products by catgory (eg. /product?category=cookie)
 router.get("/product", getProductByCategory);
 
-/*
-//usure (add product to cart)
-router.post("/product", protect, addProduct)
-//delete product from cart
-router.delete("/product{Id}", protect, removeProduct)
-//update product quantity from cart
-router.update("/product{Id}", protect, removeProduct)
-*/
-
 //Add items to cart
 router.post('/cart', protect, postCart);
 //Get cart all cart items for user 
 router.get('/cart', protect, getCartById);
 //delete Cart items
 router.delete('/cart/:itemId', protect, deleteCartItem)
+//update cart item
+router.patch('/cart/items/:itemId', protect, updateCartItem);
 
 //Checkout
 router.post('/cart/:cartId/checkout', protect, postCheckout)

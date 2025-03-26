@@ -254,34 +254,153 @@ const postCheckout = async(req, res, next) => {
 };
 
 //Delete cart items
-const deleteCartItem = async(req, res, next) => {
+// Handler for removing an item from the cart
+const deleteCartItem = async (req, res, next) => {
     try {
-        // Get the authenticated user
-        const userId = req.user._id;
+        // Get user ID from authentication middleware
+        const userId = req.userId || (req.user && req.user.id);
+        
+        if (!userId) {
+            return res.status(401).json({ message: 'User ID not found' });
+        }
+
+        // Get the item ID from the URL parameter
         const itemId = req.params.itemId;
+        
+        if (!itemId) {
+            return res.status(400).json({ message: 'Item ID is required' });
+        }
 
-        // Find the user and update their cart
-        const user = await User.findByIdAndUpdate(
-            userId, 
-            { $pull: { userCart: { _id: itemId } } }, // Remove item with matching ID
-            { new: true } // Return the updated document
-        );
-
-        // Check if user exists
+        // Find the user and ensure they exist
+        const user = await User.findById(userId);
+        
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Respond with updated cart
+        // Make sure user has a cart
+        if (!user.userCart || !user.userCart.products) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Find the item in the cart
+        const itemIndex = user.userCart.products.findIndex(
+            item => item._id.toString() === itemId
+        );
+        
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Item not found in cart' });
+        }
+
+        // Get the item price to subtract from total
+        const itemPrice = user.userCart.products[itemIndex].price * 
+                         (user.userCart.products[itemIndex].quantity || 1);
+
+        // Remove the item from the products array
+        user.userCart.products.splice(itemIndex, 1);
+        
+        // Update the cart total price
+        user.userCart.priceTotal -= itemPrice;
+        
+        // Ensure price total doesn't go below zero
+        if (user.userCart.priceTotal < 0) {
+            user.userCart.priceTotal = 0;
+        }
+        
+        // Save the updated user document
+        await user.save();
+        
+        // Return success response
         res.status(200).json({
             message: 'Item removed from cart successfully',
             cart: user.userCart
         });
+        
     } catch (err) {
-        console.error('Error removing cart item:', err);
+        console.error('Error removing item from cart:', err);
         next(err);
     }
-}
+};
+
+const updateCartItem = async (req, res, next) => {
+    try {
+        // Get user ID from authentication middleware
+        const userId = req.userId || (req.user && req.user.id);
+        
+        if (!userId) {
+            return res.status(401).json({ message: 'User ID not found' });
+        }
+
+        // Get the item ID from the URL parameter
+        const itemId = req.params.itemId;
+        
+        if (!itemId) {
+            return res.status(400).json({ message: 'Item ID is required' });
+        }
+
+        // Get the new quantity from request body
+        const { quantity } = req.body;
+        
+        if (quantity === undefined || quantity < 1) {
+            return res.status(400).json({ 
+                message: 'Valid quantity is required (must be at least 1)' 
+            });
+        }
+
+        // Find the user
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if cart exists
+        if (!user.userCart || !user.userCart.products) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Find the item in the cart
+        const itemIndex = user.userCart.products.findIndex(
+            item => item._id.toString() === itemId
+        );
+        
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Item not found in cart' });
+        }
+
+        // Get the current item information
+        const item = user.userCart.products[itemIndex];
+        const oldQuantity = item.quantity || 1;
+        const itemPrice = item.price;
+
+        // Calculate the price difference due to quantity change
+        const priceDifference = itemPrice * (quantity - oldQuantity);
+        
+        // Update the item quantity
+        user.userCart.products[itemIndex].quantity = quantity;
+        
+        // Update the cart total price
+        user.userCart.priceTotal += priceDifference;
+        
+        // Ensure price total doesn't go below zero (safety check)
+        if (user.userCart.priceTotal < 0) {
+            user.userCart.priceTotal = 0;
+        }
+        
+        // Save the updated user document
+        await user.save();
+
+        // Return the updated cart
+        res.status(200).json({
+            message: 'Cart item quantity updated successfully',
+            cart: user.userCart
+        });
+        
+    } catch (err) {
+        console.error('Error updating cart item quantity:', err);
+        next(err);
+    }
+};
 
 const getOrders = async(req, res, next) => {
     try {
@@ -316,5 +435,5 @@ const getOrders = async(req, res, next) => {
 
 // Exporting the register and login functions so they can be used in other parts of the application
 module.exports = { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
-    postCheckout, deleteCartItem, getOrders
+    postCheckout, deleteCartItem, updateCartItem, getOrders
  };

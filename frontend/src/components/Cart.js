@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 function Cart() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState({ products: [], priceTotal: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,14 +20,20 @@ function Cart() {
           }
         });
 
-        // The response now directly contains items from the userCart
-        setCart(response.data.cart || []);
+        // Set the entire cart object - it has products array and priceTotal
+        if (response.data && response.data.cart) {
+          setCart(response.data.cart);
+        } else {
+          // Default empty cart structure
+          setCart({ products: [], priceTotal: 0 });
+        }
+        
         setIsLoading(false);
       } catch (err) {
         console.error('Error fetching cart items:', err);
         setError(err.response?.data?.message || 'Failed to load cart');
         setIsLoading(false);
-        setCart([]); // Ensure cart is an empty array on error
+        setCart({ products: [], priceTotal: 0 }); // Empty cart on error
       }
     };
 
@@ -35,7 +41,13 @@ function Cart() {
   }, []);
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => {
+    // Use the cart's priceTotal or calculate manually if needed
+    if (cart.priceTotal !== undefined) {
+      return cart.priceTotal.toFixed(2);
+    }
+    
+    // Fallback calculation if priceTotal isn't available
+    return (cart.products || []).reduce((total, item) => {
       const price = item.price || 0;
       const quantity = item.quantity || 1;
       return total + (price * quantity);
@@ -53,7 +65,11 @@ function Cart() {
       });
 
       // Update local state to remove the item
-      setCart(prevCart => prevCart.filter(item => item._id !== itemId));
+      setCart(prevCart => ({
+        ...prevCart,
+        products: (prevCart.products || []).filter(item => item._id !== itemId),
+        // Update priceTotal accordingly if needed
+      }));
     } catch (err) {
       console.error('Error removing item:', err);
       setError(err.response?.data?.message || 'Failed to remove item');
@@ -66,7 +82,7 @@ function Cart() {
     try {
       const token = localStorage.getItem('token');
 
-      await axios.patch(`http://localhost:5690/cart/items/${itemId}`, 
+      const response = await axios.patch(`http://localhost:5690/cart/items/${itemId}`, 
         { quantity: newQuantity },
         {
           headers: {
@@ -75,55 +91,69 @@ function Cart() {
         }
       );
 
-      // Update local state with new quantity
-      setCart(prevCart => prevCart.map(item => 
-        item._id === itemId ? { ...item, quantity: newQuantity } : item
-      ));
+      // Instead of manually calculating, use the updated cart from the server response
+      if (response.data && response.data.cart) {
+        setCart(response.data.cart);
+      } else {
+        // Fallback to manual update if server doesn't return updated cart
+        setCart(prevCart => ({
+          ...prevCart,
+          products: (prevCart.products || []).map(item => 
+            item._id === itemId ? { ...item, quantity: newQuantity } : item
+          ),
+          // Update priceTotal based on the updated products
+          priceTotal: prevCart.products.reduce((total, item) => {
+            const price = item.price || 0;
+            const quantity = item._id === itemId ? newQuantity : (item.quantity || 1);
+            return total + (price * quantity);
+          }, 0)
+        }));
+      }
     } catch (err) {
       console.error('Error updating quantity:', err);
       setError(err.response?.data?.message || 'Failed to update quantity');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="d-flex justify-content-center">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Loading...</span>
+    if (isLoading) {
+      return (
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (error) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {error}
-      </div>
-    );
-  }
+    if (error) {
+      return (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      );
+    }
 
-  if (!cart || cart.length === 0) {
-    return (
-      <div className="text-center">
-        <h2>Your Cart is Empty</h2>
-        <Link to="/dashboard" className="btn btn-primary mt-3">
-          Continue Shopping
-        </Link>
-      </div>
-    );
-  }
+    if (!cart.products || cart.products.length === 0) {
+      return (
+        <div className="text-center">
+          <h2>Your Cart is Empty</h2>
+          <Link to="/dashboard" className="btn btn-primary mt-3">
+            Continue Shopping
+          </Link>
+        </div>
+      );
+    }
 
   return (
     <div className="container">
       <h1 className="mb-4">Your Cart</h1>
       <div className="row">
         <div className="col-md-8">
-          {cart.map((item) => (
-            <div key={item._id} className="card mb-3">
+          {cart.products.map((item, index) => (
+            <div key={item._id || `item-${index}`} className="card mb-3">
               <div className="card-body d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 className="card-title">{item.name || 'Unnamed Item'}</h5>
+                  <h5 className="card-title">{item.productName || 'Unnamed Item'}</h5>
                   <p className="card-text">Price: ${(item.price || 0).toFixed(2)}</p>
                 </div>
                 <div className="d-flex align-items-center">
@@ -155,7 +185,7 @@ function Cart() {
           <div className="card">
             <div className="card-body">
               <h5 className="card-title">Cart Summary</h5>
-              <p className="card-text">Total Items: {cart.length}</p>
+              <p className="card-text">Total Items: {cart.products.length}</p>
               <p className="card-text">
                 Total Price: ${calculateTotal()}
               </p>
