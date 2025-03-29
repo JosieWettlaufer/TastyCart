@@ -59,4 +59,67 @@ const deleteProductByID = async (req, res) => {
     }
 };
 
-module.exports = { deleteProductByID };
+// Update a product by ID
+const updateProductByID = async (req, res) => {
+    try {
+        // Get the product ID from URL parameter
+        const productId = req.params.editProductId;
+        
+        console.log("Updating product with ID:", productId);
+        console.log("Update data received:", req.body);
+        
+        if (!productId) {
+            console.log("Product ID missing in request");
+            return res.status(400).json({ message: 'Product ID is required' });
+        }
+
+        // Get updated product data from request body
+        const { productName, price, description, quantity, category } = req.body;
+        
+        // Create update object with only the provided fields
+        const updateData = {};
+        if (productName) updateData.productName = productName;
+        if (price !== undefined) updateData.price = price;
+        if (description !== undefined) updateData.description = description;
+        if (quantity !== undefined) updateData.quantity = quantity;
+        if (category) updateData.category = category;
+        
+        console.log("Final update data to be applied:", updateData);
+
+        // Update the product in the database
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            updateData,
+            { new: true } // Return the updated document
+        );
+        
+        if (!updatedProduct) {
+            console.log("Product not found with ID:", productId);
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        
+        console.log("Product updated successfully:", updatedProduct);
+        
+        // Return success response
+        return res.status(200).json({
+            message: 'Product updated successfully',
+            product: updatedProduct
+        });
+        
+    } catch (err) {
+        console.error('Error details:', err);
+        console.error('Error stack:', err.stack);
+        
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid product ID format' });
+        }
+        
+        return res.status(500).json({ 
+            message: 'Server error when updating product',
+            error: err.message 
+        });
+    }
+};
+
+
+module.exports = { deleteProductByID, updateProductByID };
