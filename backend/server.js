@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const userRoutes = require('./routes/userRoutes2');
+const adminRoutes = require('./routes/adminRoutes')
 //stripe + client test secret key
 const stripe = require('stripe')('sk_test_51R6n86KbzkDbosBfleOqPMx3aUTzQMldA8IqvuSOBKkhb0s0f0CV8axkLXoyYFyVlpl5JmupjyBi0Uq82pLK7a3q00hlx18kvk');
 
@@ -126,6 +127,7 @@ app.post('/create-checkout-session', protect, async (req, res) => {
 
 //use auth routes defined in authRoutes.js file
 app.use('/', userRoutes);
+app.use('/admin', adminRoutes);
 
 const PORT = process.env.PORT || 5690;
 

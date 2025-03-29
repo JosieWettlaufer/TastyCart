@@ -18,7 +18,7 @@ function Header( { setUser } ) {
 
   //show logout link
   const showLogout = () => {
-    if (location.pathname !== '/register' && location.pathname !== '/login') {
+    if (location.pathname !== '/register' && location.pathname !== '/login' && location.pathname !== '/dashboard') {
       return <a className="nav-link text-danger" 
         href="./login"
         onClick={(e) => {

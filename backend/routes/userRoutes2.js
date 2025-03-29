@@ -1,6 +1,6 @@
 const express = require('express');
 //IMPORT CONTROLLER METHODS
-const { registerUser, loginUser, getUser, getProductByID, getProductByCategory, postCart, getCartById, postCheckout,
+const { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
     deleteCartItem, updateCartItem, createOrder } = require('../controllers/userController');
 const protect = require('../middleware/protect');
 const router = express.Router();

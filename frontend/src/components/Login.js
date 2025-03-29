@@ -23,7 +23,7 @@ const Login = ({ setUser }) => {
       setUser(res.data.user);
       alert("Login successful!");
 
-      navigate("/dashboard");
+      navigate("/productspage");
     } catch (err) {
       alert("Login failed");
     }

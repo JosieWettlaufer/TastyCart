@@ -10,9 +10,10 @@ import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Cart from './components/Cart';
 import NotFound from './components/NotFound'; // Recommended: Add a 404 page
-import CheckoutFormAI from './components/CheckoutFormAI';
 import CheckoutForm from './components/CheckoutForm';
 import Return from './components/Return'
+import ProductsPage from './components/ProductsPage';
+import AdminDashboard from './components/AdminDashboard';
 
 
 
@@ -55,16 +56,17 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/dashboard" element={<Dashboard />} />
-
            
             
             {/* Protected Routes */}
             <Route element={<ProtectedRoute user={user} />}>
-              <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
+              <Route path='/productspage' element={ <ProductsPage setUser={setUser}/> }></Route>
               <Route path="/cart" element={<Cart user={user} />} />
                {/* Stripe Routes */}
               <Route path="/return" element={<Return />} /> 
-              <Route path="/cart/checkout" element={<CheckoutFormAI />}></Route>
+              <Route path="/cart/checkout" element={<CheckoutForm />}></Route>
+              {/* Future Admin Routes */}
+              <Route path='/admin' element={ <AdminDashboard setUser={setUser}/> }></Route>
             </Route>
             
             {/* 404 Route */}
