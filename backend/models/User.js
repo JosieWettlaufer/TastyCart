@@ -32,8 +32,9 @@ const orderSchema = new mongoose.Schema ({
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  email: {type: String, required: true},
   password: { type: String, required: true },
+  role: { type: String, required: true, default: "User"},
+  email: { type: String, reuired: true},
   userCart: cartSchema,
   userOrders: [orderSchema]
 });

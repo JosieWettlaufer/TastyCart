@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import '../App.css'
 
@@ -30,6 +30,7 @@ const Login = ({ setUser }) => {
   };
 
   return (
+  <div>
     <form onSubmit={handleSubmit} className="container mt-4 p-4 border rounded shadow-sm">
       <h2 className="mb-3">Login</h2>
 
@@ -61,6 +62,10 @@ const Login = ({ setUser }) => {
 
       <button type="submit" className="btn btn-primary">Login</button>
     </form>
+    <Link to = "/register">
+     Don't have an account? Register Here 
+     </Link>
+  </div>
   );
 };
 

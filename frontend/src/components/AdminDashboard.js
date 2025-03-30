@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import SearchBar from "./SearchBar";
 
 const AdminDashboard = ({ setUser }) => {
   // Component now works with or without a logged-in user
@@ -8,10 +9,11 @@ const AdminDashboard = ({ setUser }) => {
   const [products, setProducts] = useState([]);
   const [displayedItems, setDisplayedItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
   const [editFormData, setEditFormData] = useState({
     productName: "",
@@ -69,10 +71,14 @@ const AdminDashboard = ({ setUser }) => {
 
   const sortByCategory = (selectedCategory) => {
     setSelectedCategory(selectedCategory);
-    const filteredItems = products.filter(
-      (item) => item.category === selectedCategory
-    );
-    setDisplayedItems(filteredItems);
+    if (selectedCategory !== "All"){
+        const filteredItems = products.filter(
+        (item) => item.category === selectedCategory
+        );
+        setDisplayedItems(filteredItems);
+    } else {
+        setDisplayedItems(products);
+    }
   };
 
   const sortByName = () => {
@@ -83,7 +89,22 @@ const AdminDashboard = ({ setUser }) => {
   };
 
   // Simple edit function
-  const handleEdit = (productId) => {
+  const handleEdit = (productId, isAdding) => {
+    if (isAdding) {
+      // Initialize all required fields with default values
+      setEditFormData({
+        productName: "",
+        price: 0, // Make sure price is initialized
+        description: "A delicious treat!", // Provide a default value
+        quantity: 1,
+        category: "Cookies", // Set a default category
+      });
+
+      setEditProductId(null);
+      setIsEditing(true);
+      return;
+    }
+
     // Find the product to edit
     const productToEdit = products.find((product) => product._id === productId);
 
@@ -103,6 +124,7 @@ const AdminDashboard = ({ setUser }) => {
 
     // Set editing state
     setEditProductId(productId);
+
     setIsEditing(true);
   };
 
@@ -123,77 +145,139 @@ const AdminDashboard = ({ setUser }) => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     // Get token from local storage
     const token = localStorage.getItem("token");
-    
+
     console.log("Submitting form with data:", editFormData);
     console.log("Product ID to update:", editProductId);
-    console.log("API endpoint being called:", `http://localhost:5690/admin/product/${editProductId}`);
-  
-    // Send update request
-    axios
-      .put(
-        `http://localhost:5690/admin/product/${editProductId}`,
-        editFormData,
-        {
+
+    if (!isAdding) {
+      console.log(
+        "API endpoint being called:",
+        `http://localhost:5690/admin/product/${editProductId}`
+      );
+
+      // Send update request
+      axios
+        .put(
+          `http://localhost:5690/admin/product/${editProductId}`,
+          editFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log("Update response:", response);
+
+          if (response.status === 200) {
+            // Update local state
+            setProducts((prevProducts) =>
+              prevProducts.map((product) =>
+                product._id === editProductId
+                  ? { ...product, ...editFormData, _id: product._id }
+                  : product
+              )
+            );
+
+            setDisplayedItems((prevItems) =>
+              prevItems.map((item) =>
+                item._id === editProductId
+                  ? { ...item, ...editFormData, _id: item._id }
+                  : item
+              )
+            );
+
+            // Reset editing state
+            setIsEditing(false);
+            setEditProductId(null);
+
+            alert("Product updated successfully");
+          }
+        })
+        .catch((err) => {
+          console.error("Error updating product. Full error:", err);
+
+          if (err.response) {
+            console.log("Error status:", err.response.status);
+            console.log("Error data:", err.response.data);
+          } else if (err.request) {
+            // Request was made but no response received
+            console.log("No response received:", err.request);
+          } else {
+            // Something happened in setting up the request
+            console.log("Request setup error:", err.message);
+          }
+
+          alert(
+            `Failed to update product: ${
+              err.response?.data?.message || err.message || "Unknown error"
+            }`
+          );
+        });
+    } else {
+      console.log("Full data being sent:", JSON.stringify(editFormData));
+      console.log(
+        "API endpoint being called:",
+        "http://localhost:5690/admin/product"
+      );
+
+      // Send add request
+      axios
+        .post("http://localhost:5690/admin/product", editFormData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      )
-      .then((response) => {
-        console.log("Update response:", response);
-        
-        if (response.status === 200) {
-          // Update local state
-          setProducts((prevProducts) =>
-            prevProducts.map((product) =>
-              product._id === editProductId
-                ? { ...product, ...editFormData, _id: product._id }
-                : product
-            )
+        })
+        .then((response) => {
+          console.log("Add response:", response);
+
+          if (response.status === 201 || response.status === 200) {
+            // Get the newly created product from the response
+            const newProduct = response.data.product;
+
+            // Update local state with the new product
+            setProducts([...products, newProduct]);
+            setDisplayedItems([...displayedItems, newProduct]);
+
+            // Reset editing state
+            setIsEditing(false);
+            setIsAdding(false);
+            setEditProductId(null);
+
+            alert("Product added successfully");
+          }
+        })
+        .catch((err) => {
+          console.error("Error adding product. Full error:", err);
+
+          if (err.response) {
+            console.log("Error status:", err.response.status);
+            console.log("Error data:", err.response.data);
+          } else if (err.request) {
+            // Request was made but no response received
+            console.log("No response received:", err.request);
+          } else {
+            // Something happened in setting up the request
+            console.log("Request setup error:", err.message);
+          }
+
+          alert(
+            `Failed to add product: ${
+              err.response?.data?.message || err.message || "Unknown error"
+            }`
           );
-  
-          setDisplayedItems((prevItems) =>
-            prevItems.map((item) =>
-              item._id === editProductId 
-                ? { ...item, ...editFormData, _id: item._id } 
-                : item
-            )
-          );
-  
-          // Reset editing state
-          setIsEditing(false);
-          setEditProductId(null);
-  
-          alert("Product updated successfully");
-        }
-      })
-      .catch((err) => {
-        console.error("Error updating product. Full error:", err);
-        
-        if (err.response) {
-          console.log("Error status:", err.response.status);
-          console.log("Error data:", err.response.data);
-        } else if (err.request) {
-          // Request was made but no response received
-          console.log("No response received:", err.request);
-        } else {
-          // Something happened in setting up the request
-          console.log("Request setup error:", err.message);
-        }
-        
-        alert(`Failed to update product: ${
-          err.response?.data?.message || err.message || "Unknown error"
-        }`);
-      });
+        });
+    }
   };
 
   // Cancel editing - THIS FUNCTION WAS MISSING
   const handleCancel = () => {
     console.log("Cancel button clicked");
     setIsEditing(false);
+    setIsAdding(false);
     setEditProductId(null);
   };
 
@@ -241,49 +325,34 @@ const AdminDashboard = ({ setUser }) => {
     <div>
       {/* Search & Categories */}
       <section className="mb-5 text-center">
-        <div className="d-flex justify-content-center align-items-center mb-4">
-          <div className="input-group" style={{ maxWidth: "500px" }}>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Find products"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="btn btn-warning" onClick={sortByName}>
-              Search
-            </button>
-          </div>
-        </div>
-        <div className="d-flex justify-content-center flex-wrap gap-2">
-          {["Cakes", "Cookies", "Bread", "Pastries", "Muffins", "Other"].map(
-            (category) => (
-              <button
-                key={category}
-                className={`btn me-2 mb-2 ${
-                  selectedCategory === category
-                    ? "btn-warning"
-                    : "btn-outline-warning"
-                }`}
-                onClick={() => sortByCategory(category)}
-              >
-                {category}
-              </button>
-            )
-          )}
-        </div>
-      </section>
+        <SearchBar 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            sortByName = {sortByName}
+            sortByCategory = {sortByCategory}
+            selectedCategory={selectedCategory}
+        />
+        </section>
 
       {/* Products Section */}
       <div className="d-flex justify-content-between mb-3">
         <h2>Product List</h2>
-        <button className="btn btn-success">Add Product</button>
+        <button
+          className="btn btn-success"
+          onClick={() => {
+            setIsAdding(true);
+            handleEdit(null, true);
+          }}
+          disabled={isEditing || isAdding}
+        >
+          Add Product
+        </button>
       </div>
 
-          {/* Edit Form - Add this after your product list section */}
+      {/* Edit Form - Add this after your product list section */}
       {isEditing && (
         <div className="mt-4 p-3 border rounded">
-          <h3>Edit Product</h3>
+          <h3>{isAdding ? "Add" : "Edit"} Product</h3>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="form-label">Product Name</label>
@@ -409,7 +478,10 @@ const AdminDashboard = ({ setUser }) => {
                     <div>
                       <button
                         className="btn btn-primary me-2"
-                        onClick={() => handleEdit(product._id)}
+                        onClick={() => {
+                          handleEdit(product._id);
+                        }}
+                        disabled={isEditing || isAdding}
                       >
                         Edit
                       </button>
@@ -432,8 +504,6 @@ const AdminDashboard = ({ setUser }) => {
           </ul>
         )}
       </section>
-
-      
     </div>
   );
 };

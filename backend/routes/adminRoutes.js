@@ -2,17 +2,22 @@
 
 const express = require('express');
 //IMPORT CONTROLLER METHODS
-const {  deleteProductByID, updateProductByID } = require('../controllers/adminController');
-const protect = require('../middleware/protect');
+const {  deleteProductByID, updateProductByID, addProductInfo, registerAdmin, loginAdmin } = require('../controllers/adminController');
+const protectAdmin = require('../middleware/protectAdmin');
 const router = express.Router();
 
 
+//Login/register
+router.post("/register", registerAdmin);
+router.post("/login", loginAdmin);
+
 
 //Get products by id
-router.delete("/product/:productId", deleteProductByID); //ADD middleware!!!
+router.delete("/product/:productId", protectAdmin, deleteProductByID); 
 
-router.put("/product/:editProductId", updateProductByID);
+router.put("/product/:editProductId", protectAdmin, updateProductByID);
 
+router.post("/product", protectAdmin, addProductInfo);
 
 
 

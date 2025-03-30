@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from './ProductCard';
+import SearchBar from './SearchBar';
 
 const ProductsPage = ({ setUser }) => {
     // Component now works with or without a logged-in user
@@ -59,8 +60,14 @@ const ProductsPage = ({ setUser }) => {
 
     const sortByCategory = (selectedCategory) => {
         setSelectedCategory(selectedCategory);
-        const filteredItems = products.filter(item => item.category === selectedCategory);
-        setDisplayedItems(filteredItems);
+        if (selectedCategory !== "All"){
+            const filteredItems = products.filter(
+            (item) => item.category === selectedCategory
+            );
+            setDisplayedItems(filteredItems);
+        } else {
+            setDisplayedItems(products);
+        }
     };
 
     const sortByName = () => {
@@ -73,32 +80,13 @@ const ProductsPage = ({ setUser }) => {
         <div>
             {/* Search & Categories */}
             <section className="mb-5 text-center">
-                <div className="d-flex justify-content-center align-items-center mb-4">
-                    <div className="input-group" style={{ maxWidth: '500px' }}>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Find delicious treats…" 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <button className="btn btn-warning" onClick={sortByName}>
-                            Search
-                        </button>
-                    </div>
-                </div>
-                <div className="d-flex justify-content-center flex-wrap gap-2">
-                    {["Cakes", "Cookies", "Bread", "Pastries", "Muffins", "Other"].map((category) => (
-                        <button
-                            key={category}
-                            className={`btn me-2 mb-2 ${
-                                selectedCategory === category ? "btn-warning" : "btn-outline-warning"}`}
-                            onClick={() => sortByCategory(category)}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                </div>
+                <SearchBar 
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    sortByName = {sortByName}
+                    sortByCategory = {sortByCategory}
+                    selectedCategory={selectedCategory}
+                />
             </section>
 
             {/* Featured Products */}

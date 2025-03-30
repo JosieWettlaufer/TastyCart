@@ -39,29 +39,39 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { username, password } = req.body;
 
-    // Find user by username in the database
-    const user = await User.findOne({ username });
+    try {
+        // Find user by username in the database
+        const user = await User.findOne({ username });
 
-    // Check if the user exists and if the provided password matches the hashed password
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(400).json({ message: "Invalid credentials" });
+        // Check if the user exists and if the provided password matches the hashed password
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        // Generate a JWT token for the authenticated user
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role
+            }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1h' } // Token expires in 1 hour
+        );
+
+        // Send the token and user details in the response
+        res.json({ 
+            token,
+            user: {
+                id: user._id, 
+                username: user.username, 
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('login error:', error);
+        res.status(500).json({ message: "Server error during login" });
     }
-
-    // Generate a JWT token for the authenticated user
-    const token = jwt.sign(
-        {
-             id: user._id,
-             userId: user._id
-        }, 
-        process.env.JWT_SECRET, 
-        { expiresIn: '1h' } // Token expires in 1 hour
-    );
-
-    // Send the token and user details in the response
-    res.json({ 
-        token,
-        user: { id: user._id, username: user.username, email: user.email }
-    });
 };
 
 //Get Product by Id
