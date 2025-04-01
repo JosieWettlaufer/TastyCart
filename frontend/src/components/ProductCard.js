@@ -3,6 +3,7 @@ import axios from "axios";
 //Cloudinary imports
 import {Cloudinary} from "@cloudinary/url-gen";
 import { AdvancedImage } from '@cloudinary/react';
+import { cartService } from "../services/cartService";
 
 const ProductCard = ({ product }) => {
   const cld = new Cloudinary({ cloud: { cloudName: "dl3dsnroa" } });
@@ -48,11 +49,7 @@ const ProductCard = ({ product }) => {
       };
 
       // Make API call to add product to cart
-      await axios.post("http://localhost:5690/cart", productToAdd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await cartService.addToCart(productToAdd);
 
       // Show success notification (instead of alert)
       setNotification({

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';  // Import useLocation
-import '../static/Navbar.css';
+import '../App.css';
+import { authService } from '../services/authService';
 
 function Header( { setUser } ) {
   const location = useLocation();  // Get the current location (route)
@@ -10,11 +11,11 @@ function Header( { setUser } ) {
 
   //handles logout
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
-    localStorage.removeItem("user");
+    authService.logout();
     setUser(null);
     navigate("/login");
   };
+
 
   //show logout link
   const showLogout = () => {

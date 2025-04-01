@@ -2,7 +2,7 @@ const express = require('express');
 //IMPORT CONTROLLER METHODS
 const { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
     deleteCartItem, updateCartItem, getRecentOrder } = require('../controllers/userController');
-const protect = require('../middleware/protect');
+const protectRoutes = require('../middleware/protectRoutes');
 const router = express.Router();
 
 
@@ -15,15 +15,15 @@ router.get("/product/:productId", getProductByID);
 router.get("/product", getProductByCategory);
 
 //Add items to cart
-router.post('/cart', protect, postCart);
+router.post('/cart', protectRoutes, postCart);
 //Get cart all cart items for user 
-router.get('/cart', protect, getCartById);
+router.get('/cart', protectRoutes, getCartById);
 //delete Cart items
-router.delete('/cart/:itemId', protect, deleteCartItem)
+router.delete('/cart/:itemId', protectRoutes, deleteCartItem)
 //update cart item
-router.patch('/cart/items/:itemId', protect, updateCartItem);
+router.patch('/cart/items/:itemId', protectRoutes, updateCartItem);
 
 //Checkout
-router.get('/orders', protect, getRecentOrder);
+router.get('/orders', protectRoutes, getRecentOrder);
 
 module.exports = router;

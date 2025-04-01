@@ -1,30 +1,32 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-const ProtectedRoute = ({ user }) => {
-    const token = localStorage.getItem("token"); // Check if token exists
-    return token ? <Outlet context={{ user }}/> : <Navigate to="/login" />;
-};
-
-const AdminRoute = ({ user }) => {
+// Combined route component with role checking capability
+const ProtectedRoute = ({ user, requireAdmin = false }) => {
     const token = localStorage.getItem("token");
-
+    
+    // If no token exists, redirect to appropriate login page
     if (!token) {
-        return <Navigate to="admin/login" />;
+        return <Navigate to={requireAdmin ? "/admin/login" : "/login"} />;
     }
-
-    try {
-        const decoded = jwtDecode(token);
-
-        if (decoded.role !== "admin") {
-            return <Navigate to="admin/login" />;
+    
+    // For admin routes, verify the role
+    if (requireAdmin) {
+        try {
+            const decoded = jwtDecode(token);
+            
+            if (decoded.role !== "admin") {
+                return <Navigate to="/admin/login" />;
+            }
+        } catch (error) {
+            // Invalid token, clear it and redirect
+            localStorage.removeItem("token");
+            return <Navigate to="/admin/login" />;
         }
-
-        return <Outlet context={{ user }} />;
-    } catch (error) {
-        localStorage.removeItem("token");
-        return <Navigate to="admin/login" />;
     }
+    
+    // Token exists (and role check passed if needed)
+    return <Outlet context={{ user }} />;
 };
 
-export { ProtectedRoute, AdminRoute }
+export { ProtectedRoute };

@@ -3,7 +3,7 @@
 const express = require('express');
 //IMPORT CONTROLLER METHODS
 const {  deleteProductByID, updateProductByID, addProductInfo, registerAdmin, loginAdmin } = require('../controllers/adminController');
-const protectAdmin = require('../middleware/protectAdmin');
+const protectRoutes = require('../middleware/protectRoutes');
 const router = express.Router();
 
 
@@ -13,11 +13,11 @@ router.post("/login", loginAdmin);
 
 
 //Get products by id
-router.delete("/product/:productId", protectAdmin, deleteProductByID); 
+router.delete("/product/:productId", protectRoutes, deleteProductByID); 
 
-router.put("/product/:editProductId", protectAdmin, updateProductByID);
+router.put("/product/:editProductId", protectRoutes, updateProductByID);
 
-router.post("/product", protectAdmin, addProductInfo);
+router.post("/product", protectRoutes, addProductInfo);
 
 
 

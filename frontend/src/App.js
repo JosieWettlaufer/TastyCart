@@ -78,7 +78,7 @@ const App = () => {
               <Route path="/cart/checkout" element={<CheckoutForm />}></Route>
             </Route>
 
-            <Route element={<AdminRoute user={user} />}>
+            <Route element={<ProtectedRoute user={user} requireAdmin={true} />}>
               {/* Future Admin Routes */}
               <Route
                   path="/admin"

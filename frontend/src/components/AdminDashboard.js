@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import SearchBar from "./SearchBar";
 import CloudinaryUpload from "./CloudinaryUpload";
+import { productService } from "../services/productService";
+import { authService } from "../services/authService";
 
 const AdminDashboard = ({ setUser }) => {
   // Component now works with or without a logged-in user
@@ -28,7 +30,7 @@ const AdminDashboard = ({ setUser }) => {
   const handleImageUpload = (imageUrl) => {
     setEditFormData({
       ...editFormData,
-      image: imageUrl
+      image: imageUrl,
     });
   };
 
@@ -37,15 +39,8 @@ const AdminDashboard = ({ setUser }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // Modified to handle both logged-in and non-logged-in states
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5690/product", {
-          headers: token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : {},
-        });
+
+        const response = await productService.getProducts();
 
         // Handle the specific API response format
         if (response.data && Array.isArray(response.data.products)) {
@@ -65,8 +60,7 @@ const AdminDashboard = ({ setUser }) => {
         // If server returns 401 and user was logged in, clear credentials
         // but don't redirect, just show products for non-logged in users
         if (err.response && err.response.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
+          authService.logout();
           if (setUser) setUser(null);
           // Don't navigate away, let them stay on dashboard
         }
@@ -80,13 +74,13 @@ const AdminDashboard = ({ setUser }) => {
 
   const sortByCategory = (selectedCategory) => {
     setSelectedCategory(selectedCategory);
-    if (selectedCategory !== "All"){
-        const filteredItems = products.filter(
+    if (selectedCategory !== "All") {
+      const filteredItems = products.filter(
         (item) => item.category === selectedCategory
-        );
-        setDisplayedItems(filteredItems);
+      );
+      setDisplayedItems(filteredItems);
     } else {
-        setDisplayedItems(products);
+      setDisplayedItems(products);
     }
   };
 
@@ -154,133 +148,67 @@ const AdminDashboard = ({ setUser }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get token from local storage
-    const token = localStorage.getItem("token");
+    try {
+      if (!isAdding) {
+        const response = await productService.updateProduct(
+          editProductId,
+          editFormData
+        );
 
-    console.log("Submitting form with data:", editFormData);
-    console.log("Product ID to update:", editProductId);
-
-    if (!isAdding) {
-      console.log(
-        "API endpoint being called:",
-        `http://localhost:5690/admin/product/${editProductId}`
-      );
-
-      // Send update request
-      axios
-        .put(
-          `http://localhost:5690/admin/product/${editProductId}`,
-          editFormData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((response) => {
-          console.log("Update response:", response);
-
-          if (response.status === 200) {
-            // Update local state
-            setProducts((prevProducts) =>
-              prevProducts.map((product) =>
-                product._id === editProductId
-                  ? { ...product, ...editFormData, _id: product._id }
-                  : product
-              )
-            );
-
-            setDisplayedItems((prevItems) =>
-              prevItems.map((item) =>
-                item._id === editProductId
-                  ? { ...item, ...editFormData, _id: item._id }
-                  : item
-              )
-            );
-
-            // Reset editing state
-            setIsEditing(false);
-            setEditProductId(null);
-
-            alert("Product updated successfully");
-          }
-        })
-        .catch((err) => {
-          console.error("Error updating product. Full error:", err);
-
-          if (err.response) {
-            console.log("Error status:", err.response.status);
-            console.log("Error data:", err.response.data);
-          } else if (err.request) {
-            // Request was made but no response received
-            console.log("No response received:", err.request);
-          } else {
-            // Something happened in setting up the request
-            console.log("Request setup error:", err.message);
-          }
-
-          alert(
-            `Failed to update product: ${
-              err.response?.data?.message || err.message || "Unknown error"
-            }`
+        if (response.status === 200) {
+          // Update local state
+          setProducts((prevProducts) =>
+            prevProducts.map((product) =>
+              product._id === editProductId
+                ? { ...product, ...editFormData, _id: product._id }
+                : product
+            )
           );
-        });
-    } else {
-      console.log("Full data being sent:", JSON.stringify(editFormData));
-      console.log(
-        "API endpoint being called:",
-        "http://localhost:5690/admin/product"
-      );
 
-      // Send add request
-      axios
-        .post("http://localhost:5690/admin/product", editFormData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          console.log("Add response:", response);
-
-          if (response.status === 201 || response.status === 200) {
-            // Get the newly created product from the response
-            const newProduct = response.data.product;
-
-            // Update local state with the new product
-            setProducts([...products, newProduct]);
-            setDisplayedItems([...displayedItems, newProduct]);
-
-            // Reset editing state
-            setIsEditing(false);
-            setIsAdding(false);
-            setEditProductId(null);
-
-            alert("Product added successfully");
-          }
-        })
-        .catch((err) => {
-          console.error("Error adding product. Full error:", err);
-
-          if (err.response) {
-            console.log("Error status:", err.response.status);
-            console.log("Error data:", err.response.data);
-          } else if (err.request) {
-            // Request was made but no response received
-            console.log("No response received:", err.request);
-          } else {
-            // Something happened in setting up the request
-            console.log("Request setup error:", err.message);
-          }
-
-          alert(
-            `Failed to add product: ${
-              err.response?.data?.message || err.message || "Unknown error"
-            }`
+          setDisplayedItems((prevItems) =>
+            prevItems.map((item) =>
+              item._id === editProductId
+                ? { ...item, ...editFormData, _id: item._id }
+                : item
+            )
           );
-        });
+
+          // Reset editing state
+          setIsEditing(false);
+          setEditProductId(null);
+
+          alert("Product updated successfully");
+        }
+      } else {
+        // Send add request
+        const response = await productService.addProduct(editFormData);
+
+        if (response.status === 201 || response.status === 200) {
+          // Get the newly created product from the response
+          const newProduct = response.data.product;
+
+          // Update local state with the new product
+          setProducts([...products, newProduct]);
+          setDisplayedItems([...displayedItems, newProduct]);
+
+          // Reset editing state
+          setIsEditing(false);
+          setIsAdding(false);
+          setEditProductId(null);
+
+          alert("Product added successfully");
+        }
+      }
+    } catch (err) {
+      console.error("Error updating product", err);
+      alert(
+        `Failed to ${isAdding ? "add" : "update"} product: ${
+          err.message || "Unknown error"
+        }`
+      );
     }
   };
 
@@ -294,21 +222,7 @@ const AdminDashboard = ({ setUser }) => {
 
   const handleDelete = async (productId) => {
     try {
-      console.log(`Attempting to delete product: ${productId}`);
-
-      const token = localStorage.getItem("token");
-
-      // Make API call to delete product - NO AUTHENTICATION
-      const response = await axios.delete(
-        `http://localhost:5690/admin/product/${productId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      console.log("Delete response:", response);
+      const response = await productService.deleteProduct(productId);
 
       if (response.status === 200) {
         // Update local state to remove the deleted product
@@ -343,14 +257,14 @@ const AdminDashboard = ({ setUser }) => {
     <div>
       {/* Search & Categories */}
       <section className="mb-5 text-center">
-        <SearchBar 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            sortByName = {sortByName}
-            sortByCategory = {sortByCategory}
-            selectedCategory={selectedCategory}
+        <SearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortByName={sortByName}
+          sortByCategory={sortByCategory}
+          selectedCategory={selectedCategory}
         />
-        </section>
+      </section>
 
       {/* Products Section */}
       <div className="d-flex justify-content-between mb-3">
@@ -372,11 +286,11 @@ const AdminDashboard = ({ setUser }) => {
         <div className="mt-4 p-3 border rounded">
           <h3>{isAdding ? "Add" : "Edit"} Product</h3>
           <form onSubmit={handleSubmit}>
-          <div className="mb-3">
+            <div className="mb-3">
               <label className="form-label">Image Url</label>
-              <CloudinaryUpload 
-              onImageUpload={handleImageUpload}
-              currentImageUrl={editFormData.image}
+              <CloudinaryUpload
+                onImageUpload={handleImageUpload}
+                currentImageUrl={editFormData.image}
               />
             </div>
 

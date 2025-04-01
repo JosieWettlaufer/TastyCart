@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import ProductCard from './ProductCard';
 import SearchBar from './SearchBar';
+import { productService } from '../services/productService';
 
-const ProductsPage = ({ setUser }) => {
+const ProductsPage = () => {
     // Component now works with or without a logged-in user
-    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [displayedItems, setDisplayedItems] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
@@ -19,42 +17,18 @@ const ProductsPage = ({ setUser }) => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                // Modified to handle both logged-in and non-logged-in states
-                const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:5690/product', {
-                    headers: token ? {
-                        Authorization: `Bearer ${token}`
-                    } : {}
-                });
-                
-                // Handle the specific API response format
-                if (response.data && Array.isArray(response.data.products)) {
-                    setProducts(response.data.products);
-                    setDisplayedItems(response.data.products);
-                } else {
-                    console.error('Unexpected data format from API:', response.data);
-                    setError('Received invalid data format from server');
-                }
-                
+                const data = await productService.getProducts();
+                setProducts(data.products);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching products:', err);
-                setError('Failed to load products. Please try again later.');
+                setError('Failed to load products.');
                 setLoading(false);
-                
-                // If server returns 401 and user was logged in, clear credentials
-                // but don't redirect, just show products for non-logged in users
-                if (err.response && err.response.status === 401) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    if (setUser) setUser(null);
-                    // Don't navigate away, let them stay on dashboard
-                }
             }
         };
 
         fetchProducts();
-    }, [navigate, setUser]);
+    }, []);
     
     // Removed the user check to allow non-logged in users to view the dashboard
 

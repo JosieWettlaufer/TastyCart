@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-    // Component now works with or without a logged-in user
     
     return (
         <div className="container">

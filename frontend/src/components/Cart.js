@@ -1,38 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { cartService } from '../services/cartService';
 
 function Cart() {
   const [cart, setCart] = useState({ products: [], priceTotal: 0 });
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        // Get the authentication token from local storage
-        const token = localStorage.getItem('token');
-
-        // Fetch cart items
-        const response = await axios.get('http://localhost:5690/cart', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        // Set the entire cart object - it has products array and priceTotal
-        if (response.data && response.data.cart) {
-          setCart(response.data.cart);
-        } else {
-          // Default empty cart structure
-          setCart({ products: [], priceTotal: 0 });
-        }
-        
-        setIsLoading(false);
+        const data = await cartService.getCart();
+        setCart(data.cart);
       } catch (err) {
         console.error('Error fetching cart items:', err);
-        setError(err.response?.data?.message || 'Failed to load cart');
-        setIsLoading(false);
         setCart({ products: [], priceTotal: 0 }); // Empty cart on error
       }
     };
@@ -56,13 +37,7 @@ function Cart() {
 
   const handleRemoveItem = async (itemId) => {
     try {
-      const token = localStorage.getItem('token');
-
-      await axios.delete(`http://localhost:5690/cart/${itemId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      await cartService.removeItem(itemId);
 
       // Update local state to remove the item
       setCart(prevCart => ({
@@ -80,16 +55,7 @@ function Cart() {
     if (newQuantity < 1) return;
 
     try {
-      const token = localStorage.getItem('token');
-
-      const response = await axios.patch(`http://localhost:5690/cart/items/${itemId}`, 
-        { quantity: newQuantity },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      const response = await cartService.updateQuantity(itemId, newQuantity);
 
       // Instead of manually calculating, use the updated cart from the server response
       if (response.data && response.data.cart) {
@@ -114,16 +80,6 @@ function Cart() {
       setError(err.response?.data?.message || 'Failed to update quantity');
     }
   };
-
-    if (isLoading) {
-      return (
-        <div className="d-flex justify-content-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      );
-    }
 
     if (error) {
       return (
