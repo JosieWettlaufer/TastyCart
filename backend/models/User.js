@@ -19,6 +19,7 @@ const cartSchema = new mongoose.Schema({
 //Order model
 const orderSchema = new mongoose.Schema ({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  email: { type: String },
   orderItems: cartSchema,
   shippingAddress: { type: String, required: true },
   paymentMethod: { type: String, required: true },

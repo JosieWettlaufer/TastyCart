@@ -42,7 +42,6 @@ function Header( { setUser } ) {
 
           <ul className="navbar-links">
             <li><Link to="/">Home</Link></li>
-            <li><Link to="/dashboard">Products</Link></li>
             <li><Link to="/login">Login</Link></li>
             <li><Link to="/register">Register</Link></li>
             <li><Link to="/cart">Cart</Link></li>

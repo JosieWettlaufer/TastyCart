@@ -32,7 +32,6 @@ const registerAdmin = async (req, res) => {
 
     // Send success response after user is registered
     res.status(201).json({ message: "Admin created registered successfully" });
-    <Navigate to="/admin"/>
 };
 
 const deleteProductByID = async (req, res) => {

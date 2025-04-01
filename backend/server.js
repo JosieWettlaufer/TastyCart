@@ -63,6 +63,9 @@ app.post('/create-checkout-session', protect, async (req, res) => {
       mode: 'payment',
       return_url: `${YOUR_DOMAIN}/return?session_id={CHECKOUT_SESSION_ID}`,
       automatic_tax: {enabled: true},
+      shipping_address_collection: {
+        allowed_countries: ['CA'], // Add countries you want to allow
+      },
       //Store user ID in metadata for reference
       metadata: {
         userId: userId.toString()
@@ -76,9 +79,10 @@ app.post('/create-checkout-session', protect, async (req, res) => {
   }
 });
   
-  app.get('/session-status', async (req, res) => {
+app.get('/session-status', async (req, res) => {
     try {
     const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+    let orderData = null;
   
     // If payment is successful, create an order and clear the cart
     if (session.status === 'complete' && session.metadata && session.metadata.userId) {
@@ -92,7 +96,7 @@ app.post('/create-checkout-session', protect, async (req, res) => {
                     user: userId,
                     email: user.email,
                     orderItems: user.userCart,
-                    shippingAddress: session.shipping ? session.shipping.address.line1 : 'Not provided',
+                    shippingAddress: session.shipping_details?.address?.line1 || 'Not provided',
                     paymentMethod: 'Stripe',
                     totalPrice: session.amount_total / 100, // Convert from cents
                     isPaid: true,
@@ -101,6 +105,8 @@ app.post('/create-checkout-session', protect, async (req, res) => {
                 
                 // Add order to user's orders
                 user.userOrders.push(newOrder);
+
+                orderData = newOrder;
                 
                 // Clear the cart
                 user.userCart = { priceTotal: 0, products: [] };
@@ -117,7 +123,8 @@ app.post('/create-checkout-session', protect, async (req, res) => {
 
   res.send({
     status: session.status,
-    customer_email: session.customer_details ? session.customer_details.email : ''
+    customer_email: session.customer_details ? session.customer_details.email : '',
+    order: orderData
         });
     } catch (error) {
         console.error('Error retrieving session:', error);

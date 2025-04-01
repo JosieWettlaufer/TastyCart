@@ -73,7 +73,7 @@ const App = () => {
                 element={<ProductsPage setUser={setUser} />}
               ></Route>
               <Route path="/cart" element={<Cart user={user} />} />
-              <Route path="/return" element={<Return />} />
+              <Route path="/return" element={<Return user={user} />} />
               <Route path="/cart/checkout" element={<CheckoutForm />}></Route>
             </Route>
 

@@ -412,20 +412,13 @@ const updateCartItem = async (req, res, next) => {
     }
 };
 
-// Controller for creating a new order
-const createOrder = async (req, res, next) => {
+//Function for getting most recent
+const getRecentOrder = async (req, res, next) => {
     try {
         const userId = req.userId || (req.user && req.user.id);
         
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
-        }
-        
-        // Get order data from request body
-        const { orderItems, shippingAddress, paymentMethod } = req.body;
-        
-        if (!orderItems || !shippingAddress || !paymentMethod) {
-            return res.status(400).json({ message: 'Missing required order information' });
         }
         
         // Find the user
@@ -434,39 +427,17 @@ const createOrder = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
-        // Create new order
-        const newOrder = {
-            user: userId,
-            orderItems: orderItems,
-            shippingAddress: shippingAddress,
-            paymentMethod: paymentMethod,
-            totalPrice: orderItems.priceTotal,
-            isPaid: false
-        };
-        
-        // Add order to user's orders array
-        user.userOrders.push(newOrder);
-        
-        // Clear the user's cart
-        user.userCart = { priceTotal: 0, products: [] };
-        
-        // Save the updated user document
-        await user.save();
-        
-        // Return the new order
-        res.status(201).json({
-            message: 'Order created successfully',
+
+        res.status(200).json({
+            message: 'Order retrieved successfully',
             order: user.userOrders[user.userOrders.length - 1]
         });
-        
-    } catch (err) {
-        console.error('Error creating order:', err);
+    } catch(err) {
         next(err);
     }
-};
+}
 
 // Exporting the register and login functions so they can be used in other parts of the application
 module.exports = { registerUser, loginUser, getProductByID, getProductByCategory, postCart, getCartById,
-    postCheckout, deleteCartItem, updateCartItem, createOrder
+    postCheckout, deleteCartItem, updateCartItem, getRecentOrder
  };
