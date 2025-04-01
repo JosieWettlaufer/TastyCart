@@ -19,7 +19,6 @@ const cartSchema = new mongoose.Schema({
 //Order model
 const orderSchema = new mongoose.Schema ({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-  email: { type: String },
   orderItems: cartSchema,
   shippingAddress: { type: String, required: true },
   paymentMethod: { type: String, required: true },
@@ -35,7 +34,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: true, default: "User"},
-  email: { type: String, reuired: true},
+  email: { type: String, required: true},
   userCart: cartSchema,
   userOrders: [orderSchema]
 });
