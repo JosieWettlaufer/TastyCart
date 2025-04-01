@@ -19,6 +19,7 @@ const ProductsPage = () => {
                 setLoading(true);
                 const data = await productService.getProducts();
                 setProducts(data.products);
+                setDisplayedItems(data.products);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching products:', err);

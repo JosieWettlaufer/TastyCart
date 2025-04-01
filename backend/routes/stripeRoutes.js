@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
-const protect = require('../middleware/protect');
+const protectRoutes = require('../middleware/protectRoutes');
 const { User } = require('../models/User'); // Add this import
 //stripe + client test secret key
 const stripe = require('stripe')('sk_test_51R6n86KbzkDbosBfleOqPMx3aUTzQMldA8IqvuSOBKkhb0s0f0CV8axkLXoyYFyVlpl5JmupjyBi0Uq82pLK7a3q00hlx18kvk');
@@ -63,7 +63,7 @@ async function sendOrderConfirmation (customerOrder, customerEmail) {
 }
 
 //Stripe api calls
-router.post('/create-checkout-session', protect, async (req, res) => {
+router.post('/create-checkout-session', protectRoutes, async (req, res) => {
     try {
         //get userId and auth middleware
         const userId = req.userId || (req.user && req.user.id);

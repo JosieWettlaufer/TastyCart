@@ -1,4 +1,4 @@
-import { addProductInfo } from '../../../backend/controllers/adminController';
+
 import api from './api';
 
 export const productService = {
@@ -25,7 +25,7 @@ export const productService = {
     addProduct: async (productData) => {
         try {
             const response = await api.post('/admin/product', productData);
-            return response.data;
+            return response;
         } catch (error) {
             throw error;
         }
@@ -35,7 +35,7 @@ export const productService = {
   updateProduct: async (productId, productData) => {
     try {
       const response = await api.put(`/admin/product/${productId}`, productData);
-      return response.data;
+      return response;
     } catch (error) {
       throw error;
     }
@@ -45,7 +45,7 @@ export const productService = {
   deleteProduct: async (productId) => {
     try {
       const response = await api.delete(`/admin/product/${productId}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error;
     }

@@ -11,7 +11,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
-import { ProtectedRoute, AdminRoute } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Cart from "./components/Cart";
 import NotFound from "./components/NotFound"; // Recommended: Add a 404 page
 import CheckoutForm from "./components/CheckoutForm";

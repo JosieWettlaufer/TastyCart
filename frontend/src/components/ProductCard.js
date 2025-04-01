@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 //Cloudinary imports
 import {Cloudinary} from "@cloudinary/url-gen";
 import { AdvancedImage } from '@cloudinary/react';

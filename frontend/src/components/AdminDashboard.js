@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import SearchBar from "./SearchBar";
 import CloudinaryUpload from "./CloudinaryUpload";
 import { productService } from "../services/productService";
@@ -40,14 +39,14 @@ const AdminDashboard = ({ setUser }) => {
       try {
         setLoading(true);
 
-        const response = await productService.getProducts();
+        const data = await productService.getProducts();
 
         // Handle the specific API response format
-        if (response.data && Array.isArray(response.data.products)) {
-          setProducts(response.data.products);
-          setDisplayedItems(response.data.products);
+        if (data && Array.isArray(data.products)) {
+          setProducts(data.products);
+          setDisplayedItems(data.products);
         } else {
-          console.error("Unexpected data format from API:", response.data);
+          console.error("Unexpected data format from API:", data);
           setError("Received invalid data format from server");
         }
 
