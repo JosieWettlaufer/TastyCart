@@ -1,6 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -23,6 +22,7 @@ import AdminLogin from "./components/AdminLogin";
 import AdminRegister from "./components/AdminRegister";
 
 const App = () => {
+
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,6 +49,7 @@ const App = () => {
   }
 
   return (
+    
     <Router>
       <div className="container-fluid p-0">
         <Header setUser={setUser} user={user} />{" "}

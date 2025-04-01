@@ -16,7 +16,7 @@ const AdminRoute = ({ user }) => {
     try {
         const decoded = jwtDecode(token);
 
-        if (decoded.role !== "Admin") {
+        if (decoded.role !== "admin") {
             return <Navigate to="admin/login" />;
         }
 

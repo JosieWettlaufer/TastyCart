@@ -18,6 +18,8 @@
   "homepage": "https://github.com/JosieWettlaufer/TastyCart#readme",
   "description": "",
   "dependencies": {
+    "@cloudinary/react": "^1.14.1",
+    "@cloudinary/url-gen": "^1.21.0",
     "@stripe/react-stripe-js": "^3.5.1",
     "@stripe/stripe-js": "^6.1.0",
     "bcrypt": "^5.1.1",

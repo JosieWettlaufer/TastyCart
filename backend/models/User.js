@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 
 //test products
 const productSchema = new mongoose.Schema({
+  image: {type: String},
   productName: { type: String, required: true }, 
   price: { type: Number, required: true }, 
   description: { type: String, default: 'A delicious treat!' },

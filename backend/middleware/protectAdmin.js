@@ -8,7 +8,7 @@ const protectAdmin = async (req, res, next) => {
     if (!token) return res.status(401).json({ message: "Unauthorized access" });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, "your_super_secret_key");
         req.user = decoded;  // Assigns decoded user id to req to use in future methods
 
         // Set userId explicitly from the decoded token

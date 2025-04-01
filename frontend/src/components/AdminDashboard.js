@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import SearchBar from "./SearchBar";
+import CloudinaryUpload from "./CloudinaryUpload";
 
 const AdminDashboard = ({ setUser }) => {
   // Component now works with or without a logged-in user
@@ -22,6 +23,14 @@ const AdminDashboard = ({ setUser }) => {
     quantity: 0,
     category: "Cookies",
   });
+
+  // Handle image upload from CloudinaryUpload component
+  const handleImageUpload = (imageUrl) => {
+    setEditFormData({
+      ...editFormData,
+      image: imageUrl
+    });
+  };
 
   useEffect(() => {
     // Fetch products when component mounts
@@ -93,6 +102,7 @@ const AdminDashboard = ({ setUser }) => {
     if (isAdding) {
       // Initialize all required fields with default values
       setEditFormData({
+        image: "",
         productName: "",
         price: 0, // Make sure price is initialized
         description: "A delicious treat!", // Provide a default value
@@ -115,6 +125,7 @@ const AdminDashboard = ({ setUser }) => {
 
     // Set the form data with current product values
     setEditFormData({
+      image: productToEdit.image,
       productName: productToEdit.productName,
       price: productToEdit.price,
       description: productToEdit.description,
@@ -285,9 +296,16 @@ const AdminDashboard = ({ setUser }) => {
     try {
       console.log(`Attempting to delete product: ${productId}`);
 
+      const token = localStorage.getItem("token");
+
       // Make API call to delete product - NO AUTHENTICATION
       const response = await axios.delete(
-        `http://localhost:5690/admin/product/${productId}`
+        `http://localhost:5690/admin/product/${productId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
 
       console.log("Delete response:", response);
@@ -354,6 +372,14 @@ const AdminDashboard = ({ setUser }) => {
         <div className="mt-4 p-3 border rounded">
           <h3>{isAdding ? "Add" : "Edit"} Product</h3>
           <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+              <label className="form-label">Image Url</label>
+              <CloudinaryUpload 
+              onImageUpload={handleImageUpload}
+              currentImageUrl={editFormData.image}
+              />
+            </div>
+
             <div className="mb-3">
               <label className="form-label">Product Name</label>
               <input
@@ -459,6 +485,9 @@ const AdminDashboard = ({ setUser }) => {
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <p>{product._id}</p>
+                      <p className="mb-1">
+                        <strong>Image URL:</strong> {product.image}
+                      </p>
                       <p className="mb-1">
                         <strong>Name:</strong> {product.productName}
                       </p>

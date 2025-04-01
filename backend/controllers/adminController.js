@@ -28,7 +28,7 @@ const registerAdmin = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     //Create and save the new user in the database
-    const user = await User.create({ username, email, password: hashedPassword, role: "Admin" });
+    const user = await User.create({ username, email, password: hashedPassword, role: "admin" });
 
     // Send success response after user is registered
     res.status(201).json({ message: "Admin created registered successfully" });
@@ -107,10 +107,14 @@ const updateProductByID = async (req, res) => {
         }
 
         // Get updated product data from request body
-        const { productName, price, description, quantity, category } = req.body;
+        const { image, productName, price, description, quantity, category } = req.body;
+
+        const shortImgUrl = image.split('/')[image.split('/').length - 1];
+
         
         // Create update object with only the provided fields
         const updateData = {};
+        if (image) updateData.image = shortImgUrl;
         if (productName) updateData.productName = productName;
         if (price !== undefined) updateData.price = price;
         if (description !== undefined) updateData.description = description;
@@ -158,7 +162,10 @@ const updateProductByID = async (req, res) => {
 const addProductInfo = async(req, res) => {
 
     try {
-        const product = new Product(req.body);
+        const { productName, price, description, quantity, category } = req.body;
+        const image = req.body.image ? req.body.image.split('/')[req.body.image.split('/').length - 1] : null;
+
+        const product = new Product({ image, productName, price, description, quantity, category });
 
         await product.save();
 
@@ -184,7 +191,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        if (user.role !== "Admin") {
+        if (user.role !== "admin") {
             return res.status(400).json({ message: "Invalid role" })
         }
 
