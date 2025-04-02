@@ -5,14 +5,13 @@ import CloudinaryUpload from "./CloudinaryUpload";
 import { productService } from "../services/productService";
 import { authService } from "../services/authService";
 
+//METHOD: access admin dashboard
 const AdminDashboard = ({ setUser }) => {
-  // Component now works with or without a logged-in user
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
-  const [displayedItems, setDisplayedItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
+  const [products, setProducts] = useState([]);                   
+  const [displayedItems, setDisplayedItems] = useState([]);       
+  const [selectedCategory, setSelectedCategory] = useState(null); 
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -37,11 +36,11 @@ const AdminDashboard = ({ setUser }) => {
     // Fetch products when component mounts
     const fetchProducts = async () => {
       try {
-        setLoading(true);
 
+        //Get Products from database
         const data = await productService.getProducts();
 
-        // Handle the specific API response format
+        // Set API response to products and displayed items
         if (data && Array.isArray(data.products)) {
           setProducts(data.products);
           setDisplayedItems(data.products);
@@ -50,18 +49,14 @@ const AdminDashboard = ({ setUser }) => {
           setError("Received invalid data format from server");
         }
 
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching products:", err);
         setError("Failed to load products. Please try again later.");
-        setLoading(false);
 
         // If server returns 401 and user was logged in, clear credentials
-        // but don't redirect, just show products for non-logged in users
         if (err.response && err.response.status === 401) {
           authService.logout();
           if (setUser) setUser(null);
-          // Don't navigate away, let them stay on dashboard
         }
       }
     };
@@ -69,8 +64,7 @@ const AdminDashboard = ({ setUser }) => {
     fetchProducts();
   }, [navigate, setUser]);
 
-  // Removed the user check to allow non-logged in users to view the dashboard
-
+  //sort/display products by selected category 
   const sortByCategory = (selectedCategory) => {
     setSelectedCategory(selectedCategory);
     if (selectedCategory !== "All") {
@@ -79,10 +73,12 @@ const AdminDashboard = ({ setUser }) => {
       );
       setDisplayedItems(filteredItems);
     } else {
+      //If all is selected display all products
       setDisplayedItems(products);
     }
   };
 
+  //Sort products by name
   const sortByName = () => {
     const filteredItems = products.filter((item) =>
       item.productName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -90,10 +86,11 @@ const AdminDashboard = ({ setUser }) => {
     setDisplayedItems(filteredItems);
   };
 
-  // Simple edit function
+  // Edit Product information function
   const handleEdit = (productId, isAdding) => {
+    //If adding new product
     if (isAdding) {
-      // Initialize all required fields with default values
+      // Initialize all fields with empty/default values
       setEditFormData({
         image: "",
         productName: "",
@@ -104,7 +101,8 @@ const AdminDashboard = ({ setUser }) => {
       });
 
       setEditProductId(null);
-      setIsEditing(true);
+      //state variable makes new product form appear
+      setIsEditing(true); 
       return;
     }
 
@@ -126,23 +124,18 @@ const AdminDashboard = ({ setUser }) => {
       category: productToEdit.category,
     });
 
-    // Set editing state
+    // Set editing state to make form appear with product values in fields
     setEditProductId(productId);
-
     setIsEditing(true);
   };
 
   // Handle form input changes
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target; //name = name of input field, value = value of input field
     setEditFormData({
-      ...editFormData,
-      [name]:
-        name === "price"
-          ? parseFloat(value)
-          : name === "quantity"
-          ? parseInt(value)
-          : value,
+      ...editFormData,  //spread operator copies all previous state values
+      //if input name equals price or quantity, convert to float. Otherwise take value as is
+      [name]: name === "price" || name === "quantity" ? parseFloat(value) : value,
     });
   };
 
@@ -151,22 +144,28 @@ const AdminDashboard = ({ setUser }) => {
     e.preventDefault();
 
     try {
+      //If editing product
       if (!isAdding) {
+        //update product by id with form data
         const response = await productService.updateProduct(
           editProductId,
           editFormData
         );
 
         if (response.status === 200) {
-          // Update local state
+          // Update products using products previous state and edit form data
           setProducts((prevProducts) =>
             prevProducts.map((product) =>
+              //If prevProduct product id equals edited product id
               product._id === editProductId
+                //override prevProduct with edit form data
                 ? { ...product, ...editFormData, _id: product._id }
+                //Otherwise map product as is
                 : product
             )
           );
 
+          //update displayed products by updating previous items with new form data
           setDisplayedItems((prevItems) =>
             prevItems.map((item) =>
               item._id === editProductId
@@ -176,13 +175,13 @@ const AdminDashboard = ({ setUser }) => {
           );
 
           // Reset editing state
-          setIsEditing(false);
+          setIsEditing(false); //hides add/edit form 
           setEditProductId(null);
 
           alert("Product updated successfully");
         }
       } else {
-        // Send add request
+        // Send add request containing form data
         const response = await productService.addProduct(editFormData);
 
         if (response.status === 201 || response.status === 200) {
@@ -211,16 +210,17 @@ const AdminDashboard = ({ setUser }) => {
     }
   };
 
-  // Cancel editing - THIS FUNCTION WAS MISSING
+  // Cancel editing 
   const handleCancel = () => {
-    console.log("Cancel button clicked");
     setIsEditing(false);
     setIsAdding(false);
     setEditProductId(null);
   };
 
+  //Delete product
   const handleDelete = async (productId) => {
     try {
+      //Delete product from database
       const response = await productService.deleteProduct(productId);
 
       if (response.status === 200) {
@@ -280,19 +280,23 @@ const AdminDashboard = ({ setUser }) => {
         </button>
       </div>
 
-      {/* Edit Form - Add this after your product list section */}
+      {/* Edit Form */}
       {isEditing && (
         <div className="mt-4 p-3 border rounded">
           <h3>{isAdding ? "Add" : "Edit"} Product</h3>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
+
+              {/* Product Image*/}
               <label className="form-label">Image Url</label>
+              {/* Cloudinary image upload component*/}
               <CloudinaryUpload
                 onImageUpload={handleImageUpload}
                 currentImageUrl={editFormData.image}
               />
             </div>
 
+            {/* Product Name*/}
             <div className="mb-3">
               <label className="form-label">Product Name</label>
               <input
@@ -305,6 +309,7 @@ const AdminDashboard = ({ setUser }) => {
               />
             </div>
 
+            {/* Product Price*/}
             <div className="mb-3">
               <label className="form-label">Price</label>
               <input
@@ -318,6 +323,7 @@ const AdminDashboard = ({ setUser }) => {
               />
             </div>
 
+            {/* Product Description */}
             <div className="mb-3">
               <label className="form-label">Description</label>
               <textarea
@@ -328,6 +334,7 @@ const AdminDashboard = ({ setUser }) => {
               />
             </div>
 
+            {/* Product Quantity */}
             <div className="mb-3">
               <label className="form-label">Quantity</label>
               <input
@@ -340,6 +347,7 @@ const AdminDashboard = ({ setUser }) => {
               />
             </div>
 
+            {/* Product Category*/}
             <div className="mb-3">
               <label className="form-label">Category</label>
               <select
@@ -348,13 +356,7 @@ const AdminDashboard = ({ setUser }) => {
                 value={editFormData.category}
                 onChange={handleFormChange}
               >
-                {[
-                  "Cakes",
-                  "Cookies",
-                  "Bread",
-                  "Pastries",
-                  "Muffins",
-                  "Other",
+                {["Cakes", "Cookies", "Bread", "Pastries", "Muffins", "Other",
                 ].map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -379,14 +381,9 @@ const AdminDashboard = ({ setUser }) => {
         </div>
       )}
 
+      {/* Display errors if any, if none display list of products */}
       <section className="mb-5">
-        {loading ? (
-          <div className="text-center p-5">
-            <div className="spinner-border text-warning" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="alert alert-danger" role="alert">
             {error}
           </div>

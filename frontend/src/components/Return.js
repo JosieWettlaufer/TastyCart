@@ -2,7 +2,7 @@
 import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-
+//Returns order confirmation and sends email
 const Return = () => {
   const [info, setInfo] = useState(null);
   const [status, setStatus] = useState('');
@@ -12,9 +12,7 @@ const Return = () => {
     const urlParams = new URLSearchParams(queryString);
     const sessionId = urlParams.get('session_id');
     
-    console.log("Return component mounted, session ID:", sessionId);
-    
-    // Fetch session status
+    // Fetch session status, customer email, and current order
     if (sessionId) {
       fetch(`http://localhost:5690/session-status?session_id=${sessionId}`)
         .then(res => {

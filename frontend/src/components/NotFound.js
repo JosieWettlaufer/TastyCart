@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+//Page renders when user enters invalid URL
 const NotFound = () => {
   return (
     <div className="text-center">

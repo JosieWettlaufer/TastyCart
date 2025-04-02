@@ -22,9 +22,6 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(cookieParser());
 
 
-
-
-
 //use auth routes defined in authRoutes.js file
 app.use('/', userRoutes);
 app.use('/admin', adminRoutes);

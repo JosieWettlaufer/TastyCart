@@ -1,4 +1,4 @@
-
+//html for searchbar and cateogry buttons
 const SearchBar = ({ searchQuery, setSearchQuery, sortByName, sortByCategory, selectedCategory }) => {
   return (
     <div>

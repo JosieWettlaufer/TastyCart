@@ -6,10 +6,10 @@ const CloudinaryUpload = ({ onImageUpload, currentImageUrl }) => {
 
     return window.cloudinary.createUploadWidget(
       {
-        cloudName: "dl3dsnroa",
-        uploadPreset: "TastyCartAdmin", // Replace with your actual upload preset
-        sources: ["local", "url", "camera"],
-        multiple: false
+        cloudName: "dl3dsnroa",         // cloud name
+        uploadPreset: "TastyCartAdmin", // Upload preset
+        sources: ["local", "url", "camera"], //allowed sources for upload widget
+        multiple: false                 //can upload only one file at a time
       },
       (error, result) => {
         if (!error && result && result.event === "success") {

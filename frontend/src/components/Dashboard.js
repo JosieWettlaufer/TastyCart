@@ -14,9 +14,11 @@ const Dashboard = () => {
                         Discover homemade treats from passionate local bakers.
                     </p>
                     <div className="d-flex justify-content-center gap-3">
+                        {/* Sign into User Account */}
                         <Link to="/login" className="btn btn-warning btn-lg">
                             Shop Now
                         </Link>
+                        {/* Sign into Admin account */}
                         <Link to="/admin" className="btn btn-outline-warning btn-lg me-2">
                             Become a Seller
                         </Link>
@@ -24,7 +26,7 @@ const Dashboard = () => {
                 </div>
             </section>
 
-            {/* How It Works */}
+            {/* How It Works Section*/}
             <section className="bg-light py-5 text-center mb-4">
                 <h3 className="display-6 fw-bold mb-4">How It Works</h3>
                 <div className="row g-4 justify-content-center">

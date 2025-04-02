@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 import { authService } from "../services/authService";
 
+// Receives 'setUser' (function to update user state) and 'isAdmin' (optional flag for admin login)
 const LoginForm = ({ setUser, isAdmin = false }) => {
   const [credentials, setCredentials] = useState({
     username: "",
@@ -10,6 +11,7 @@ const LoginForm = ({ setUser, isAdmin = false }) => {
   });
   const navigate = useNavigate();
 
+  //updates credentials when input fields change
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
@@ -17,12 +19,12 @@ const LoginForm = ({ setUser, isAdmin = false }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (isAdmin) {
+      if (isAdmin) { //if logging in as admin checks for admin role
         const res = await authService.adminLogin(credentials);
         setUser(res.user);
         alert("Login successful!");
         navigate("/admin");
-      } else {
+      } else {  //checks for valid credentials and logs in as user
         const res = await authService.login(credentials);
         setUser(res.user);
         alert("Login successful!");
@@ -78,6 +80,7 @@ const LoginForm = ({ setUser, isAdmin = false }) => {
         </button>
       </form>
       
+      {/*Sets user/admin registration link*/}
       {isAdmin ? (
         <Link to="/admin/register">Don't have an account? Register Here</Link>
       ) : (

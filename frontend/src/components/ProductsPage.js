@@ -4,10 +4,9 @@ import SearchBar from './SearchBar';
 import { productService } from '../services/productService';
 
 const ProductsPage = () => {
-    // Component now works with or without a logged-in user
     const [products, setProducts] = useState([]);
     const [displayedItems, setDisplayedItems] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null); // Track selected category
+    const [selectedCategory, setSelectedCategory] = useState(null); 
     const [searchQuery, setSearchQuery] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -30,9 +29,8 @@ const ProductsPage = () => {
 
         fetchProducts();
     }, []);
-    
-    // Removed the user check to allow non-logged in users to view the dashboard
 
+    //Sort products by selected category
     const sortByCategory = (selectedCategory) => {
         setSelectedCategory(selectedCategory);
         if (selectedCategory !== "All"){
@@ -41,10 +39,12 @@ const ProductsPage = () => {
             );
             setDisplayedItems(filteredItems);
         } else {
+            //display all products if "All" selected
             setDisplayedItems(products);
         }
     };
 
+    //sort product cards by name
     const sortByName = () => {
         const filteredItems = products.filter(item => item.productName.toLowerCase().includes(searchQuery.toLowerCase())
     );

@@ -13,7 +13,7 @@ import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Cart from "./components/Cart";
-import NotFound from "./components/NotFound"; // Recommended: Add a 404 page
+import NotFound from "./components/NotFound"; 
 import CheckoutForm from "./components/CheckoutForm";
 import Return from "./components/Return";
 import ProductsPage from "./components/ProductsPage";
@@ -24,7 +24,6 @@ import AdminRegister from "./components/AdminRegister";
 const App = () => {
 
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -39,21 +38,14 @@ const App = () => {
         localStorage.removeItem("token");
       }
     }
-
-    setIsLoading(false);
   }, []);
 
-  // If still loading, you might want to show a loading spinner
-  if (isLoading) {
-    return <div>Loading...</div>; // Or use a more sophisticated loading component
-  }
-
   return (
-    
     <Router>
       <div className="container-fluid p-0">
+        {/* Pass user/setUser to Header for conditional rendering, logging out */}
         <Header setUser={setUser} user={user} />{" "}
-        {/* Pass user to Header for conditional rendering */}
+        
         <div className="container mt-3">
           <Routes>
             {/* Public Routes */}
@@ -66,24 +58,17 @@ const App = () => {
             <Route path="admin/register" element={<AdminRegister />} />
             <Route path="admin/login" element={<AdminLogin setUser={setUser} />} />
 
-            {/* Protected Routes */}
+            {/* Protected Routes (User)*/}
             <Route element={<ProtectedRoute user={user} />}>
-              {/* User Routes */}
-              <Route
-                path="/productspage"
-                element={<ProductsPage setUser={setUser} />}
-              ></Route>
+              <Route path="/productspage" element={<ProductsPage setUser={setUser} />} />
               <Route path="/cart" element={<Cart user={user} />} />
               <Route path="/return" element={<Return user={user} />} />
-              <Route path="/cart/checkout" element={<CheckoutForm />}></Route>
+              <Route path="/cart/checkout" element={<CheckoutForm />} />
             </Route>
 
+            {/* Protected Routes (Admin) */}
             <Route element={<ProtectedRoute user={user} requireAdmin={true} />}>
-              {/* Future Admin Routes */}
-              <Route
-                  path="/admin"
-                  element={<AdminDashboard setUser={setUser} />}
-                ></Route>
+              <Route path="/admin" element={<AdminDashboard setUser={setUser} />} />
             </Route>
 
             {/* 404 Route */}

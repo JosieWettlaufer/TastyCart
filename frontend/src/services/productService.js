@@ -13,6 +13,7 @@ export const productService = {
         }
     },
 
+    //get products by id
     getProductById: async (productId) => {
         try {
             const response = await api.get(`/product/${productId}`);
@@ -22,6 +23,7 @@ export const productService = {
         }
     },
 
+    //Add product
     addProduct: async (productData) => {
         try {
             const response = await api.post('/admin/product', productData);
@@ -31,7 +33,7 @@ export const productService = {
         }
     },
 
-    // Admin: Update product
+  // Admin: Update product
   updateProduct: async (productId, productData) => {
     try {
       const response = await api.put(`/admin/product/${productId}`, productData);

@@ -7,6 +7,7 @@ function Cart() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    //Get cart data from database and set it to state variable when component mounts
     const fetchCart = async () => {
       try {
         const data = await cartService.getCart();
@@ -20,6 +21,7 @@ function Cart() {
     fetchCart();
   }, []);
 
+  //Get/calculate cart total
   const calculateTotal = () => {
     // Use the cart's priceTotal or calculate manually if needed
     if (cart.priceTotal !== undefined) {
@@ -34,15 +36,16 @@ function Cart() {
     }, 0).toFixed(2);
   };
 
+  //Remove item from cart
   const handleRemoveItem = async (itemId) => {
     try {
+      //Remove item from database via API call
       await cartService.removeItem(itemId);
 
       // Update local state to remove the item
       setCart(prevCart => ({
         ...prevCart,
         products: (prevCart.products || []).filter(item => item._id !== itemId),
-        // Update priceTotal accordingly if needed
       }));
     } catch (err) {
       console.error('Error removing item:', err);
@@ -50,13 +53,16 @@ function Cart() {
     }
   };
 
+  //Update cart item quantity
   const handleUpdateQuantity = async (itemId, newQuantity) => {
+    //if 0 exit function
     if (newQuantity < 1) return;
 
     try {
+      //update quantity of item in cart via api call
       const response = await cartService.updateQuantity(itemId, newQuantity);
 
-      // Instead of manually calculating, use the updated cart from the server response
+      // Set the cart to the updated cart from the server response
       if (response.data && response.data.cart) {
         setCart(response.data.cart);
       } else {
@@ -88,6 +94,7 @@ function Cart() {
       );
     }
 
+    //return empty cart html if cart empty
     if (!cart.products || cart.products.length === 0) {
       return (
         <div className="text-center">
@@ -99,6 +106,7 @@ function Cart() {
       );
     }
 
+  //otherwise return html with cart items
   return (
     <div className="container">
       <h1 className="mb-4">Your Cart</h1>

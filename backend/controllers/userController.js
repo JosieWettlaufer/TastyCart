@@ -8,8 +8,9 @@ const bcrypt = require('bcryptjs');
 require("dotenv").config();
 
 
-// Register a new user
+//METHOD: Register a new user
 const registerUser = async (req, res) => {
+    //get credentials from request body
     const { username, email, password } = req.body;
 
     // Check if all required fields are provided
@@ -27,7 +28,7 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    //Create and save the new user in the database
+    //Save the new user in the database with hashed password
     const user = await User.create({ username, email, password: hashedPassword });
 
     // Send success response after user is registered
@@ -35,8 +36,9 @@ const registerUser = async (req, res) => {
 };
 
 
-// Login user and return JWT token
+//METHOD: Login user and return JWT token
 const loginUser = async (req, res) => {
+    //get credentials from request body
     const { username, password } = req.body;
 
     try {
@@ -74,32 +76,36 @@ const loginUser = async (req, res) => {
     }
 };
 
-//Get Product by Id
+//METHOD: Get Product by Id
 const getProductByID = async(req, res) => {
     const { productId } = req.params; //Get productId from URL 
 
     try {
+        //find product in database by productId
         const product = await Product.findById(productId)
         if (!product) {
             return res.status(404).json({ message: 'Product not found by controller' });
         }
 
+        //success response with product
         res.status(200).json({
             message: "Product found",
             product: product
         });
     } catch (error) {
+        //error response
         console.error("Error finding product:", error);
         res.status(500).json({ message: "Server error, failed to find product" });
     }
 }
 
-//Get product by category
+//METHOD: Get product by category
 const getProductByCategory = async (req, res) => {
+    //get category from URL
     const { category } = req.query;
     
     try {
-        // If no category provided, return all products
+        // If no category provided, return all products from database
         if (!category) {
             const products = await Product.find({});
             return res.status(200).json({
@@ -112,18 +118,21 @@ const getProductByCategory = async (req, res) => {
         // Find products matching the category
         const products = await Product.find({ category });
         
+        //If no products found, return error
         if (products.length === 0) {
             return res.status(404).json({ 
                 message: `No products found in category: ${category}` 
             });
         }
         
+        //success response with product count and list of products
         res.status(200).json({
             message: `Products in category: ${category}`,
             count: products.length,
             products
         });
     } catch (error) {
+        //error response
         console.error("Error finding products by category:", error);
         res.status(500).json({ 
             message: "Server error, failed to retrieve products",
@@ -132,20 +141,24 @@ const getProductByCategory = async (req, res) => {
     }
 };
 
+//METHOD: save user's cart to database
 const postCart = async (req, res, next) => {
     try {
-        // Try using req.userId which you explicitly set in the middleware
-        const userId = req.userId || (req.user && req.user.id);
+        // Get userId from authorization middleware
+        const userId = req.userId;
         
+        //check if userId exists
         if (!userId) {
         return res.status(401).json({ message: 'User ID not found' });
         }
 
+        //get products from request body
         const product = req.body;
 
-        // Find the user
+        // Find user in database
         const user = await User.findById(userId);
                 
+        //If not found, return error
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -155,10 +168,10 @@ const postCart = async (req, res, next) => {
             user.userCart = { priceTotal: 0, products: [] };
         }
 
-        // Add the product to the cart
+        // Add the products to the user's cart
         user.userCart.products.push(product);
         
-        // Update the price total (assuming product has a price field)
+        // Update the price total for the cart
         if (product.price) {
             user.userCart.priceTotal += product.price;
         }
@@ -166,6 +179,7 @@ const postCart = async (req, res, next) => {
         // Save the updated user document
         await user.save();
 
+        //return success message and user cart
         res.status(200).json({
             message: 'product added to cart successfully',
             cart: user.userCart
@@ -175,22 +189,25 @@ const postCart = async (req, res, next) => {
     }
 }
 
+//METHOD: get user's cart
 const getCartById = async (req, res, next) => {
 
     try {
-        const userId = req.userId || (req.user && req.user.id);
+        //Get userId from authorization middleware
+        const userId = req.userId;
         
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
         }
         
-        // Find the user
+        // Find user in the database
         const user = await User.findById(userId);
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         
+        //Return success and user's cart
         res.status(200).json({
             message: 'Cart retrieved successfully',
             cart: user.userCart
@@ -200,10 +217,11 @@ const getCartById = async (req, res, next) => {
     }
 }
 
+//METHOD: post checkout
 const postCheckout = async(req, res, next) => {
     try {
         // Get user ID from request
-        const userId = req.userId || (req.user && req.user.id);
+        const userId = req.userId;
                 
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
@@ -228,9 +246,6 @@ const postCheckout = async(req, res, next) => {
             return res.status(400).json({ message: 'Payment information or shipping address missing' });
         }
         
-        // Here you would integrate with a payment processor like Stripe
-        // For now, we'll simulate a successful payment
-        
         // Create order from cart
         const order = {
             user: userId,
@@ -245,14 +260,13 @@ const postCheckout = async(req, res, next) => {
         // Add the order to the user's userOrders array
         user.userOrders.push(order);
         
-        // Save order to database (assuming you have an Order model)
-        // const createdOrder = await Order.create(order);
-        
         // Clear the user's cart after successful order
         user.userCart.products = [];
         user.userCart.priceTotal = 0;
+        //Save user data to database
         await user.save();
         
+        //return success and order
         res.status(201).json({
             message: 'Order created successfully',
             order: order
@@ -263,12 +277,11 @@ const postCheckout = async(req, res, next) => {
     }
 };
 
-//Delete cart items
-// Handler for removing an item from the cart
+//METHOD: Delete cart items
 const deleteCartItem = async (req, res, next) => {
     try {
         // Get user ID from authentication middleware
-        const userId = req.userId || (req.user && req.user.id);
+        const userId = req.userId;
         
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
@@ -293,11 +306,12 @@ const deleteCartItem = async (req, res, next) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Find the item in the cart
+        // Find the index of the item in the cart
         const itemIndex = user.userCart.products.findIndex(
             item => item._id.toString() === itemId
         );
         
+        //If item does not exist return error
         if (itemIndex === -1) {
             return res.status(404).json({ message: 'Item not found in cart' });
         }
@@ -320,7 +334,7 @@ const deleteCartItem = async (req, res, next) => {
         // Save the updated user document
         await user.save();
         
-        // Return success response
+        // Return success response with updated cart
         res.status(200).json({
             message: 'Item removed from cart successfully',
             cart: user.userCart
@@ -332,10 +346,11 @@ const deleteCartItem = async (req, res, next) => {
     }
 };
 
+//METHOD: Update Cart item
 const updateCartItem = async (req, res, next) => {
     try {
         // Get user ID from authentication middleware
-        const userId = req.userId || (req.user && req.user.id);
+        const userId = req.userId;
         
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
@@ -351,6 +366,7 @@ const updateCartItem = async (req, res, next) => {
         // Get the new quantity from request body
         const { quantity } = req.body;
         
+        //if quantity is undefined or below 1, return error
         if (quantity === undefined || quantity < 1) {
             return res.status(400).json({ 
                 message: 'Valid quantity is required (must be at least 1)' 
@@ -369,11 +385,11 @@ const updateCartItem = async (req, res, next) => {
             return res.status(404).json({ message: 'Cart not found' });
         }
 
-        // Find the item in the cart
+        // Find the index of the item in the cart
         const itemIndex = user.userCart.products.findIndex(
             item => item._id.toString() === itemId
         );
-        
+        //If item does not exist return error
         if (itemIndex === -1) {
             return res.status(404).json({ message: 'Item not found in cart' });
         }
@@ -392,7 +408,7 @@ const updateCartItem = async (req, res, next) => {
         // Update the cart total price
         user.userCart.priceTotal += priceDifference;
         
-        // Ensure price total doesn't go below zero (safety check)
+        // Ensure price total doesn't go below zero
         if (user.userCart.priceTotal < 0) {
             user.userCart.priceTotal = 0;
         }
@@ -412,10 +428,10 @@ const updateCartItem = async (req, res, next) => {
     }
 };
 
-//Function for getting most recent
+//METHOD: Function for getting most recent
 const getRecentOrder = async (req, res, next) => {
     try {
-        const userId = req.userId || (req.user && req.user.id);
+        const userId = req.userId;
         
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found' });
@@ -428,6 +444,7 @@ const getRecentOrder = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        //success response with last entry in the user's orders array
         res.status(200).json({
             message: 'Order retrieved successfully',
             order: user.userOrders[user.userOrders.length - 1]

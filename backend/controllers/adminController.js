@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 require("dotenv").config();
 
 
-// Register a new user
+//METHOD: Register a new user
 const registerAdmin = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -34,26 +34,29 @@ const registerAdmin = async (req, res) => {
     res.status(201).json({ message: "Admin created registered successfully" });
 };
 
+//METHOD: Deletes a specific product from the database
 const deleteProductByID = async (req, res) => {
     try {
         // Get the product ID from the URL parameter
         const productId = req.params.productId;
         
+        //If no product id, returns error
         if (!productId) {
             return res.status(400).json({ message: 'Product ID is required' });
         }
         
-        // First try to find the product to see if it exists
+        // Try to find the product to see if it exists
         const productExists = await Product.findById(productId);
-        
+
         if (!productExists) {
             console.log(`Product not found with ID: ${productId}`);
             return res.status(404).json({ message: 'Product not found' });
         }
         
-        // Try using deleteOne instead of findByIdAndDelete
+        // Delete Product from database
         const result = await Product.deleteOne({ _id: productId });
         
+        //Return error if deletion fails
         if (result.deletedCount === 0) {
             return res.status(500).json({ message: 'Failed to delete product' });
         }
@@ -65,12 +68,8 @@ const deleteProductByID = async (req, res) => {
         });
         
     } catch (err) {
-        // Enhanced error logging
-        console.error('Error removing product. Error name:', err.name);
-        console.error('Error message:', err.message);
-        console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
-        console.error('Stack trace:', err.stack);
         
+        //Return custom error message based on error name
         if (err.name === 'CastError') {
             return res.status(400).json({ 
                 message: 'Invalid product ID format',
@@ -92,15 +91,13 @@ const deleteProductByID = async (req, res) => {
     }
 };
 
-// Update a product by ID
+//METHOD: Update a product by ID
 const updateProductByID = async (req, res) => {
     try {
         // Get the product ID from URL parameter
         const productId = req.params.editProductId;
-        
-        console.log("Updating product with ID:", productId);
-        console.log("Update data received:", req.body);
-        
+
+        //return error if productId not found
         if (!productId) {
             console.log("Product ID missing in request");
             return res.status(400).json({ message: 'Product ID is required' });
@@ -109,10 +106,11 @@ const updateProductByID = async (req, res) => {
         // Get updated product data from request body
         const { image, productName, price, description, quantity, category } = req.body;
 
+        //Shorten image URL
         const shortImgUrl = image.split('/')[image.split('/').length - 1];
 
         
-        // Create update object with only the provided fields
+        // Create update object with the provided fields
         const updateData = {};
         if (image) updateData.image = shortImgUrl;
         if (productName) updateData.productName = productName;
@@ -130,6 +128,7 @@ const updateProductByID = async (req, res) => {
             { new: true } // Return the updated document
         );
         
+        //Return error message if update fails
         if (!updatedProduct) {
             console.log("Product not found with ID:", productId);
             return res.status(404).json({ message: 'Product not found' });
@@ -144,9 +143,8 @@ const updateProductByID = async (req, res) => {
         });
         
     } catch (err) {
-        console.error('Error details:', err);
-        console.error('Error stack:', err.stack);
         
+        //Return custom error message based on error name
         if (err.name === 'CastError') {
             return res.status(400).json({ message: 'Invalid product ID format' });
         }
@@ -158,28 +156,36 @@ const updateProductByID = async (req, res) => {
     }
 };
 
-
+//METHOD: Add new product to database
 const addProductInfo = async(req, res) => {
 
     try {
+        //get product details from request body
         const { productName, price, description, quantity, category } = req.body;
+
+        //If image added shorten image URL
         const image = req.body.image ? req.body.image.split('/')[req.body.image.split('/').length - 1] : null;
 
+        //Create new product with updated request body attributes
         const product = new Product({ image, productName, price, description, quantity, category });
 
+        //save product to database
         await product.save();
 
+        //Success response
         res.status(201).json({
             message: 'Product added successfully',
             product: product
         });
     } catch (error) {
+        //error response
         res.status(400).json({ message: error.message });
     }
 }
 
-// Login user and return JWT token
+//METHOD: Login Admin and return JWT token
 const loginAdmin = async (req, res) => {
+    //get credentials from req body
     const { username, password } = req.body;
 
     try {
@@ -191,6 +197,7 @@ const loginAdmin = async (req, res) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
+        //Check if user has required admin role
         if (user.role !== "admin") {
             return res.status(400).json({ message: "Invalid role" })
         }
@@ -216,6 +223,7 @@ const loginAdmin = async (req, res) => {
             }
         });
     } catch (error) {
+        //error response
         console.error('login error:', error);
         res.status(500).json({ message: "Server error during login" });
     }

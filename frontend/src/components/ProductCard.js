@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+
 //Cloudinary imports
 import {Cloudinary} from "@cloudinary/url-gen";
 import { AdvancedImage } from '@cloudinary/react';
 import { cartService } from "../services/cartService";
 
 const ProductCard = ({ product }) => {
+  //stores cloudinary instance
   const cld = new Cloudinary({ cloud: { cloudName: "dl3dsnroa" } });
 
-  // Use this sample image or upload your own via the Media Explorer
+  // Uses sample image or stored shortened URL from product
   const img = product.image
   ? cld.image(product.image)
     .format("auto")
@@ -16,9 +18,8 @@ const ProductCard = ({ product }) => {
     .format("auto") // Optimize delivery by resizing and applying auto-format and auto-quality
     .quality("auto")
     
-
+  //useState variables
   const [isAdding, setIsAdding] = useState(false);
-  // We'll use this for a toast/alert message that shows temporarily
   const [notification, setNotification] = useState({
     show: false,
     message: "",
@@ -50,7 +51,7 @@ const ProductCard = ({ product }) => {
       // Make API call to add product to cart
       await cartService.addToCart(productToAdd);
 
-      // Show success notification (instead of alert)
+      // Show success notification
       setNotification({
         show: true,
         message: "Product added to cart!",
@@ -82,7 +83,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="card h-100 position-relative">
-      {/* Notification toast */}
+      {/* Item added Notification */}
       {notification.show && (
         <div
           className={`position-absolute top-0 start-50 translate-middle-x p-2 badge ${
@@ -94,6 +95,7 @@ const ProductCard = ({ product }) => {
         </div>
       )}
 
+      {/* Card top with product image */}
       <div className="card-img-top" style={{ height: "200px", overflow: "hidden"  }}>
       <AdvancedImage
        cldImg={img}
@@ -106,30 +108,22 @@ const ProductCard = ({ product }) => {
        />
       </div>
 
+      {/* Card body with product attributes */}
       <div className="card-body">
         <h5 className="card-title">{product.name}</h5>
         <p className="card-text text-truncate">{product.description}</p>
         <p className="card-text fw-bold">${product.price.toFixed(2)}</p>
         <p className="card-text">Category: {product.category}</p>
       </div>
+
+      {/* Card footer with add to cart button */}
       <div className="card-footer">
         <button
           className="btn btn-primary w-100"
           onClick={handleAddToCart}
           disabled={isAdding}
         >
-          {isAdding ? (
-            <>
-              <span
-                className="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Adding...
-            </>
-          ) : (
-            "Add to Cart"
-          )}
+          Add to Cart
         </button>
       </div>
     </div>

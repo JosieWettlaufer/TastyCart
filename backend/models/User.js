@@ -1,7 +1,6 @@
-//could also be used for admin
 const mongoose = require("mongoose");
 
-//test products
+//Product Schema
 const productSchema = new mongoose.Schema({
   image: {type: String},
   productName: { type: String, required: true }, 
@@ -11,7 +10,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, default: 'cookie' }
 });
 
-//test cart
+//Cart Schema
 const cartSchema = new mongoose.Schema({
   priceTotal: { type: Number, required: true, default: 0}, 
   products: [productSchema] // array of product objects
@@ -28,9 +27,7 @@ const orderSchema = new mongoose.Schema ({
   paidAt: {type: Date}
 });
 
-
-
-
+//User Schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
