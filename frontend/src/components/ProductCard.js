@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 //Cloudinary imports
 import {Cloudinary} from "@cloudinary/url-gen";
-import { AdvancedImage } from '@cloudinary/react';
 import { cartService } from "../services/cartService";
 
 const ProductCard = ({ product }) => {
@@ -10,13 +9,13 @@ const ProductCard = ({ product }) => {
   const cld = new Cloudinary({ cloud: { cloudName: "dl3dsnroa" } });
 
   // Uses sample image or stored shortened URL from product
-  const img = product.image
-  ? cld.image(product.image)
-    .format("auto")
-    .quality("auto")
-  : cld.image("samples/dessert-on-a-plate")
-    .format("auto") // Optimize delivery by resizing and applying auto-format and auto-quality
-    .quality("auto")
+  const cloudinaryImage = product.image
+    ? cld.image(product.image)
+        .format('auto')
+        .quality('auto')
+    : cld.image("samples/dessert-on-a-plate")
+        .format('auto')
+        .quality('auto');
     
   //useState variables
   const [isAdding, setIsAdding] = useState(false);
@@ -96,16 +95,17 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Card top with product image */}
-      <div className="card-img-top" style={{ height: "200px", overflow: "hidden"  }}>
-      <AdvancedImage
-       cldImg={img}
-       style={{ 
-        width: "100%", 
-        height: "100%", 
-        objectFit: "cover",
-        objectPosition: "center"
-      }}
-       />
+      <div className="card-img-top" style={{ height: "325px", overflow: "hidden"  }}>
+      <img
+        src={cloudinaryImage.toURL()}
+        alt={product.name}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+        }}
+      />
       </div>
 
       {/* Card body with product attributes */}

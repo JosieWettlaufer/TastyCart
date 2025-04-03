@@ -152,6 +152,8 @@ const AdminDashboard = ({ setUser }) => {
           editFormData
         );
 
+        console.log(editProductId, editFormData);
+
         if (response.status === 200) {
           // Update products using products previous state and edit form data
           setProducts((prevProducts) =>
