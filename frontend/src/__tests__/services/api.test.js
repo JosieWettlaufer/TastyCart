@@ -1,9 +1,6 @@
 // src/__tests__/services/api.test.js
 import axios from 'axios';
 
-// Clear any previous mocks
-jest.resetAllMocks();
-
 // Mock localStorage
 const localStorageMock = {
   getItem: jest.fn(),
@@ -12,77 +9,79 @@ const localStorageMock = {
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Create a mock interceptor function
-const mockInterceptorFn = jest.fn(config => config);
+// Create a mock interceptors object
+const requestUseMock = jest.fn();
+const mockInterceptors = {
+  request: {
+    use: requestUseMock
+  }
+};
 
-// Create mock axios with interceptors
+// Mock axios
 jest.mock('axios', () => ({
   create: jest.fn(() => ({
-    interceptors: {
-      request: {
-        use: jest.fn(fn => {
-          // Store the interceptor function for testing
-          mockInterceptorFn.mockImplementation(fn);
-          return fn;
-        })
-      }
-    }
+    interceptors: mockInterceptors
   }))
 }));
 
 describe('API Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset modules to ensure a fresh import
-    jest.resetModules();
   });
 
   test('creates an axios instance with the right configuration', () => {
-    // Clear all mocks before running this test
-    jest.clearAllMocks();
+    // Import the api module which should trigger axios.create
+    require('../../services/api');
     
-    // Force a fresh import which should trigger axios.create
-    jest.isolateModules(() => {
-      require('../../services/api');
-    });
-    
-    // Now check that axios.create was called with the right config
+    // Verify axios.create was called with the right config
     expect(axios.create).toHaveBeenCalledWith({
       baseURL: 'http://localhost:5690'
     });
   });
 
   test('adds token to request headers when available', () => {
-    // Import the module
+    // Mock localStorage to return a token
+    localStorageMock.getItem.mockReturnValue('test-token');
+    
+    // Reset modules to ensure clean import
+    jest.resetModules();
+    
+    // Import the module which should set up the interceptor
     require('../../services/api');
     
-    // Set up the mock to return a token
-    localStorageMock.getItem.mockReturnValueOnce('test-token');
+    // Get the interceptor function that was passed to use()
+    const interceptorFn = requestUseMock.mock.calls[0][0];
     
-    // Create a test config object
+    // Create a mock config object
     const config = { headers: {} };
     
-    // Call the interceptor function directly
-    const result = mockInterceptorFn(config);
+    // Call the interceptor function with the config
+    const result = interceptorFn(config);
     
-    // Verify token was added to headers
+    // Check that the token was added correctly
     expect(result.headers.Authorization).toBe('Bearer test-token');
   });
 
   test('does not add token to request headers when not available', () => {
-    // Import the module
+    // Mock localStorage to return null
+    localStorageMock.getItem.mockReturnValue(null);
+    
+    // Reset modules to ensure clean import
+    jest.resetModules();
+    
+    // Import the module which should set up the interceptor
     require('../../services/api');
     
-    // Set up the mock to return null (no token)
-    localStorageMock.getItem.mockReturnValueOnce(null);
+    // Get the interceptor function that was passed to use()
+    const interceptorFn = requestUseMock.mock.calls[0][0];
     
-    // Create a test config object
+    // Create a mock config object
     const config = { headers: {} };
     
-    // Call the interceptor function directly
-    const result = mockInterceptorFn(config);
+    // Call the interceptor function with the config
+    const result = interceptorFn(config);
     
-    // Verify Authorization header was not added
+    // Check that no Authorization header was added
     expect(result.headers.Authorization).toBeUndefined();
   });
 });

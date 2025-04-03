@@ -303,6 +303,7 @@ const AdminDashboard = ({ setUser }) => {
                 type="text"
                 className="form-control"
                 name="productName"
+                data-testid="product-name-input"
                 value={editFormData.productName}
                 onChange={handleFormChange}
                 required
@@ -316,6 +317,7 @@ const AdminDashboard = ({ setUser }) => {
                 type="number"
                 className="form-control"
                 name="price"
+                data-testid="price-input"
                 value={editFormData.price}
                 onChange={handleFormChange}
                 step="0.01"
@@ -329,6 +331,7 @@ const AdminDashboard = ({ setUser }) => {
               <textarea
                 className="form-control"
                 name="description"
+                data-testid="description-textarea"
                 value={editFormData.description}
                 onChange={handleFormChange}
               />
@@ -341,6 +344,7 @@ const AdminDashboard = ({ setUser }) => {
                 type="number"
                 className="form-control"
                 name="quantity"
+                data-testid="quantity-input"
                 value={editFormData.quantity}
                 onChange={handleFormChange}
                 required
@@ -353,6 +357,7 @@ const AdminDashboard = ({ setUser }) => {
               <select
                 className="form-select"
                 name="category"
+                data-testid="category-select"
                 value={editFormData.category}
                 onChange={handleFormChange}
               >
