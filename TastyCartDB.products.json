@@ -1,0 +1,79 @@
+[{
+  "_id": {
+    "$oid": "67dd202707116fc172ae47ea"
+  },
+  "productName": "Strawberry Cheesecake",
+  "price": 28.99,
+  "description": "Creamy cheesecake topped with strawberry glaze",
+  "quantity": 10,
+  "category": "Cakes",
+  "image": "kalisha-ocheni-_BBTqanOrBI-unsplash_qdheuc"
+},
+{
+  "_id": {
+    "$oid": "67dd202707116fc172ae47eb"
+  },
+  "productName": "Sourdough Bread",
+  "price": 5.99,
+  "description": "Artisan sourdough with a crispy crust",
+  "quantity": 25,
+  "category": "Bread",
+  "image": "yulia-khlebnikova-FOsVQ_XAGd0-unsplash_svke1w"
+},
+{
+  "_id": {
+    "$oid": "67dd202707116fc172ae47ec"
+  },
+  "productName": "Cinnamon Roll",
+  "price": 4.25,
+  "description": "Soft roll with cinnamon swirl and cream cheese frosting",
+  "quantity": 40,
+  "category": "Pastries",
+  "image": "fallon-michael-DnGGIffnjTY-unsplash_t8bcmb"
+},
+{
+  "_id": {
+    "$oid": "67dd202707116fc172ae47ed"
+  },
+  "productName": "Macaron Box",
+  "price": 12.99,
+  "description": "Assorted flavors of French macarons",
+  "quantity": 15,
+  "category": "Other",
+  "image": "melanie-kreutz-cSzyY2UaFSI-unsplash_uvqclt"
+},
+{
+  "_id": {
+    "$oid": "67dd202707116fc172ae47ee"
+  },
+  "productName": "Gluten-Free Brownie",
+  "price": 3.99,
+  "description": "Rich chocolate brownie made without gluten",
+  "quantity": 30,
+  "category": "Other",
+  "image": "victoria-morgan-jKc9vm1DYgg-unsplash_nmwx8r"
+},
+{
+  "_id": {
+    "$oid": "67ebce424018ad9f1651afd2"
+  },
+  "image": "anthony-espinosa-6iqpLKqeaE0-unsplash_pwle6y.jpg",
+  "productName": "Tiramisu",
+  "price": 12.25,
+  "description": "Delicious and creamy coffee-flavored cake",
+  "quantity": 1,
+  "category": "Cakes",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67ee4468d63dd63bb3b5ce2c"
+  },
+  "image": "joseph-gonzalez-TAegVkFYIqo-unsplash_cmsdpc.jpg",
+  "productName": "Carrot Muffin",
+  "price": 6.69,
+  "description": "Carroty goodness with a generous helping of cream cheese icing.",
+  "quantity": 1,
+  "category": "Muffins",
+  "__v": 0
+}]

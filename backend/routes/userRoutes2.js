@@ -20,12 +20,16 @@ router.post("/register", registerUser);
 
 //Get products by id/category (eg. /product?category=cookie)
 router.get("/product/:productId", getProductByID);
+//Get all products
 router.get("/product", getProductByCategory);
 
-//CRUD Operations for user's cart
+//Post products to user's cart
 router.post("/cart", protectRoutes, postCart);
+//Get user's cart
 router.get("/cart", protectRoutes, getCartById);
+//Delete items from user's cart using item id
 router.delete("/cart/:itemId", protectRoutes, deleteCartItem);
+//Update the quantity of a specific cart item
 router.patch("/cart/items/:itemId", protectRoutes, updateCartItem);
 
 //Checkout

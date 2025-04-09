@@ -95,7 +95,7 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Card top with product image */}
-      <div className="card-img-top" style={{ height: "325px", overflow: "hidden"  }}>
+      <div className="card-img-top" style={{ height: "250px", overflow: "hidden"  }}>
       <img
         src={cloudinaryImage.toURL()}
         alt={product.name}
